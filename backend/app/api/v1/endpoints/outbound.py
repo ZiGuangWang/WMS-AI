@@ -36,6 +36,13 @@ async def create_order(data: OutboundOrderCreate, db: AsyncIOMotorDatabase = Dep
     order_dict["status"] = 1  # 待审核
     return await outbound_crud.create(db, order_dict)
 
+@router.get("/orders/{id}", response_model=OutboundOrder)
+async def get_order(id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+    order = await outbound_crud.get_one(db, id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
+
 @router.put("/orders/{id}", response_model=OutboundOrder)
 async def update_order(id: str, data: OutboundOrderUpdate, db: AsyncIOMotorDatabase = Depends(get_database)):
     updated = await outbound_crud.update(db, id, data.model_dump(exclude_unset=True))

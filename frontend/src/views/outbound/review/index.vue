@@ -144,7 +144,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { getOutboundOrderList, reviewOutboundGoods, shipOutboundGoods } from '@/api/outbound'
+import { getOutboundOrderList, getOutboundOrderDetail, reviewOutboundGoods, shipOutboundGoods } from '@/api/outbound'
 import { getLocationList } from '@/api/basic'
 import { Message, Modal } from '@arco-design/web-vue'
 
@@ -275,8 +275,14 @@ const handleShip = (row: any) => {
   })
 }
 
-const handleDetail = (row: any) => {
-  Message.info('详情查看功能开发中...')
+const handleDetail = async (row: any) => {
+  try {
+    const res: any = await getOutboundOrderDetail(row._id)
+    Object.assign(temp, res)
+    reviewDialogVisible.value = true
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 const handleExport = () => {

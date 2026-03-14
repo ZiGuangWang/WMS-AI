@@ -24,6 +24,13 @@ export function updateOutboundOrder(id: string, data: any) {
   })
 }
 
+export function getOutboundOrderDetail(id: string) {
+  return request({
+    url: `/outbound/orders/${id}`,
+    method: 'get'
+  })
+}
+
 export function auditOutboundOrder(id: string) {
   return request({
     url: `/outbound/orders/${id}/audit`,
@@ -31,11 +38,19 @@ export function auditOutboundOrder(id: string) {
   })
 }
 
-export function reviewOutboundGoods(id: string, items: any[]) {
+export function getOutboundOrderList(params: any) {
+  return request({
+    url: '/outbound/orders',
+    method: 'get',
+    params
+  })
+}
+
+export function reviewOutboundGoods(id: string, data: any) {
   return request({
     url: `/outbound/orders/${id}/review`,
     method: 'post',
-    data: items
+    data: data.items
   })
 }
 

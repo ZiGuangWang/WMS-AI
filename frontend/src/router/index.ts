@@ -35,6 +35,18 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Supplier',
         component: () => import('../views/basic/supplier/index.vue'),
         meta: { title: '供应商管理' }
+      },
+      {
+        path: 'inbound/order',
+        name: 'InboundOrder',
+        component: () => import('../views/inbound/order/index.vue'),
+        meta: { title: '入库单管理' }
+      },
+      {
+        path: 'inbound/check',
+        name: 'InboundCheck',
+        component: () => import('../views/inbound/check/index.vue'),
+        meta: { title: '货物验收' }
       }
     ]
   }

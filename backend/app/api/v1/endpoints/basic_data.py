@@ -20,7 +20,7 @@ async def list_goods(
     name: Optional[str] = None,
     sku: Optional[str] = None,
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=1000),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     query = {}
@@ -34,11 +34,11 @@ async def create_goods(data: GoodsCreate, db: AsyncIOMotorDatabase = Depends(get
     existing = await db["goods"].find_one({"sku": data.sku})
     if existing:
         raise HTTPException(status_code=400, detail="SKU already exists")
-    return await goods_crud.create(db, data.dict())
+    return await goods_crud.create(db, data.model_dump())
 
 @router.put("/goods/{id}", response_model=Goods)
 async def update_goods(id: str, data: GoodsUpdate, db: AsyncIOMotorDatabase = Depends(get_database)):
-    updated = await goods_crud.update(db, id, data.dict(exclude_unset=True))
+    updated = await goods_crud.update(db, id, data.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(status_code=404, detail="Goods not found")
     return updated
@@ -55,7 +55,7 @@ async def list_locations(
     code: Optional[str] = None,
     area: Optional[str] = None,
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=1000),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     query = {}
@@ -68,11 +68,11 @@ async def create_location(data: LocationCreate, db: AsyncIOMotorDatabase = Depen
     existing = await db["locations"].find_one({"code": data.code})
     if existing:
         raise HTTPException(status_code=400, detail="Location code already exists")
-    return await location_crud.create(db, data.dict())
+    return await location_crud.create(db, data.model_dump())
 
 @router.put("/locations/{id}", response_model=Location)
 async def update_location(id: str, data: LocationUpdate, db: AsyncIOMotorDatabase = Depends(get_database)):
-    updated = await location_crud.update(db, id, data.dict(exclude_unset=True))
+    updated = await location_crud.update(db, id, data.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(status_code=404, detail="Location not found")
     return updated
@@ -88,7 +88,7 @@ async def delete_location(id: str, db: AsyncIOMotorDatabase = Depends(get_databa
 async def list_suppliers(
     name: Optional[str] = None,
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=1000),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     query = {}
@@ -100,11 +100,11 @@ async def create_supplier(data: SupplierCreate, db: AsyncIOMotorDatabase = Depen
     existing = await db["suppliers"].find_one({"name": data.name})
     if existing:
         raise HTTPException(status_code=400, detail="Supplier name already exists")
-    return await supplier_crud.create(db, data.dict())
+    return await supplier_crud.create(db, data.model_dump())
 
 @router.put("/suppliers/{id}", response_model=Supplier)
 async def update_supplier(id: str, data: SupplierUpdate, db: AsyncIOMotorDatabase = Depends(get_database)):
-    updated = await supplier_crud.update(db, id, data.dict(exclude_unset=True))
+    updated = await supplier_crud.update(db, id, data.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(status_code=404, detail="Supplier not found")
     return updated

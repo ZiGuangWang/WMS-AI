@@ -18,7 +18,7 @@ async def list_orders(
     type: Optional[str] = None,
     status: Optional[int] = None,
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=1000),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     query = {}
@@ -31,14 +31,14 @@ async def list_orders(
 async def create_order(data: OutboundOrderCreate, db: AsyncIOMotorDatabase = Depends(get_database)):
     # Generate Order No: OUT + timestamp
     order_no = f"OUT{datetime.now().strftime('%Y%m%d%H%M%S')}"
-    order_dict = data.dict()
+    order_dict = data.model_dump()
     order_dict["order_no"] = order_no
     order_dict["status"] = 1  # 待审核
     return await outbound_crud.create(db, order_dict)
 
 @router.put("/orders/{id}", response_model=OutboundOrder)
 async def update_order(id: str, data: OutboundOrderUpdate, db: AsyncIOMotorDatabase = Depends(get_database)):
-    updated = await outbound_crud.update(db, id, data.dict(exclude_unset=True))
+    updated = await outbound_crud.update(db, id, data.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(status_code=404, detail="Order not found")
     return updated

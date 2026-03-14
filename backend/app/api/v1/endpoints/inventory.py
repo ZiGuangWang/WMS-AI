@@ -18,7 +18,7 @@ async def query_inventory(
     sku: Optional[str] = None,
     location_code: Optional[str] = None,
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=1000),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     query = {}
@@ -140,7 +140,7 @@ async def get_inventory_logs(
     goods_id: Optional[str] = None,
     type: Optional[str] = None,
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=1000),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     query = {}

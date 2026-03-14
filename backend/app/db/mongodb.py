@@ -5,6 +5,7 @@ import logging
 class MongoDB:
     client: AsyncIOMotorClient = None
     db = None
+    perm_db = None
 
 db = MongoDB()
 
@@ -12,6 +13,8 @@ async def connect_to_mongo():
     logging.info("Connecting to MongoDB...")
     db.client = AsyncIOMotorClient(settings.MONGODB_URI)
     db.db = db.client[settings.DATABASE_NAME]
+    # Connect to PermiHub-AI's database (default to 'permission_manager' from URI or explicitly)
+    db.perm_db = db.client["permission_manager"]
     logging.info("Connected to MongoDB!")
 
 async def close_mongo_connection():
@@ -21,3 +24,6 @@ async def close_mongo_connection():
 
 def get_database():
     return db.db
+
+def get_perm_database():
+    return db.perm_db

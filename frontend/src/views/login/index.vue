@@ -42,7 +42,7 @@
       </a-form>
       
       <div class="login-footer">
-        <p>© 2024 WMS-AI Pro Warehouse Management</p>
+        <p>© 2026 WMS-AI Pro Warehouse Management</p>
       </div>
     </a-card>
   </div>
@@ -52,6 +52,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
+import { login } from '@/api/auth'
 
 const router = useRouter()
 const loginFormRef = ref()
@@ -68,15 +69,23 @@ const handleLogin = async ({ values, errors }: any) => {
   
   loading.value = true
   try {
-    // 模拟登录逻辑
-    setTimeout(() => {
-      loading.value = false
-      Message.success('登录成功，欢迎回来')
-      router.push('/')
-    }, 800)
-  } catch (error) {
+    const res: any = await login({
+      username: loginForm.username,
+      password: loginForm.password
+    })
+    
+    // 保存 Token
+    localStorage.setItem('token', res.access_token)
+    localStorage.setItem('username', loginForm.username)
+    
+    Message.success('登录成功，欢迎回来')
+    router.push('/')
+  } catch (error: any) {
+    console.error(error)
+    const errorMsg = error.response?.data?.detail || '登录失败，请检查账号信息'
+    Message.error(errorMsg)
+  } finally {
     loading.value = false
-    Message.error('登录失败，请检查网络或账号信息')
   }
 }
 </script>

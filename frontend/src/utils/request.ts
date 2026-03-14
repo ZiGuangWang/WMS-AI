@@ -9,7 +9,10 @@ const service = axios.create({
 // Request interceptor
 service.interceptors.request.use(
   config => {
-    // Add token if needed
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
     return config
   },
   error => {
@@ -26,9 +29,17 @@ service.interceptors.response.use(
   error => {
     console.log('err' + error)
     let message = error.message
-    if (error.response && error.response.data && error.response.data.detail) {
-      message = error.response.data.detail
+    
+    if (error.response) {
+      if (error.response.status === 401) {
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      }
+      if (error.response.data && error.response.data.detail) {
+        message = error.response.data.detail
+      }
     }
+    
     Message.error({
       content: message,
       duration: 5 * 1000

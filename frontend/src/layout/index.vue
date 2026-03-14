@@ -71,7 +71,7 @@
               <a-avatar :size="24" style="background-color: #165dff">
                 <icon-user />
               </a-avatar>
-              <span class="username">系统管理员</span>
+              <span class="username">{{ currentUsername }}</span>
             </div>
             <a-button type="text" @click="handleLogout">
               <template #icon><icon-poweroff /></template>
@@ -118,6 +118,7 @@ const router = useRouter()
 
 const isCollapse = ref(false)
 const activeMenu = computed(() => route.path)
+const currentUsername = ref(localStorage.getItem('username') || '系统管理员')
 
 const breadcrumbs = computed(() => {
   const matched = route.matched.filter(item => item.meta && item.meta.title)
@@ -153,6 +154,8 @@ const handleCloseTag = (path: string) => {
 }
 
 const handleLogout = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('username')
   router.push('/login')
 }
 </script>

@@ -175,7 +175,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { getInboundOrderList, checkInboundGoods, shelveInboundGoods } from '@/api/inbound'
+import { getInboundOrderList, getInboundOrderDetail, checkInboundGoods, shelveInboundGoods } from '@/api/inbound'
 import { getLocationList } from '@/api/basic'
 import { Message } from '@arco-design/web-vue'
 
@@ -309,8 +309,14 @@ const confirmShelve = async () => {
   }
 }
 
-const handleDetail = (row: any) => {
-  Message.info('详情查看功能开发中...')
+const handleDetail = async (row: any) => {
+  try {
+    const res: any = await getInboundOrderDetail(row._id)
+    Object.assign(temp, res)
+    checkDialogVisible.value = true
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 const handleExport = () => {

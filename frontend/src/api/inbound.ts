@@ -24,6 +24,13 @@ export function updateInboundOrder(id: string, data: any) {
   })
 }
 
+export function getInboundOrderDetail(id: string) {
+  return request({
+    url: `/inbound/orders/${id}`,
+    method: 'get'
+  })
+}
+
 export function auditInboundOrder(id: string) {
   return request({
     url: `/inbound/orders/${id}/audit`,
@@ -31,15 +38,23 @@ export function auditInboundOrder(id: string) {
   })
 }
 
-export function receiveInboundGoods(id: string, items: any[]) {
+export function getInboundOrderList(params: any) {
   return request({
-    url: `/inbound/orders/${id}/receive`,
-    method: 'post',
-    data: items
+    url: '/inbound/orders',
+    method: 'get',
+    params
   })
 }
 
-export function shelveInboundGoods(id: string) {
+export function checkInboundGoods(id: string, data: any) {
+  return request({
+    url: `/inbound/orders/${id}/receive`,
+    method: 'post',
+    data: data.items
+  })
+}
+
+export function shelveInboundGoods(id: string, data: any) {
   return request({
     url: `/inbound/orders/${id}/shelve`,
     method: 'post'

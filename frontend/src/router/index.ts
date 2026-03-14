@@ -59,6 +59,24 @@ const routes: Array<RouteRecordRaw> = [
         name: 'OutboundReview',
         component: () => import('../views/outbound/review/index.vue'),
         meta: { title: '货物复核' }
+      },
+      {
+        path: 'inventory/query',
+        name: 'InventoryQuery',
+        component: () => import('../views/inventory/query/index.vue'),
+        meta: { title: '实时库存查询' }
+      },
+      {
+        path: 'inventory/warning',
+        name: 'InventoryWarning',
+        component: () => import('../views/inventory/warning/index.vue'),
+        meta: { title: '库存预警' }
+      },
+      {
+        path: 'inventory/adjust',
+        name: 'InventoryAdjust',
+        component: () => import('../views/inventory/adjust/index.vue'),
+        meta: { title: '库存调整' }
       }
     ]
   }

@@ -9,9 +9,9 @@
         :default-active="activeMenu"
         class="el-menu-vertical"
         router
-        background-color="#304156"
-        text-color="#bfcbd9"
-        active-text-color="#409EFF"
+        background-color="#001529"
+        text-color="rgba(255, 255, 255, 0.65)"
+        active-text-color="#fff"
       >
         <el-menu-item index="/dashboard">
           <el-icon><Monitor /></el-icon>
@@ -111,45 +111,65 @@ const handleLogout = () => {
 }
 
 .aside {
-  background-color: #304156;
+  background-color: #001529;
   color: #fff;
+  box-shadow: 2px 0 6px rgba(0,21,41,.35);
   transition: width 0.3s;
+  z-index: 10;
   
   .logo {
-    height: 60px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
-    font-weight: bold;
-    background-color: #2b2f3a;
-    gap: 10px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #002140;
+    gap: 12px;
+    letter-spacing: 1px;
   }
 }
 
 .el-menu-vertical {
   border-right: none;
+  
+  :deep(.el-menu-item) {
+    &.is-active {
+      background-color: #1890ff !important;
+    }
+  }
 }
 
 .header {
   background-color: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 24px;
+  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  height: 64px !important;
 }
 
 .user-info {
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  padding: 0 12px;
+  height: 64px;
+  transition: background-color 0.3s;
+  
+  &:hover {
+    background-color: #f8f8f8;
+  }
 }
 
 .main {
   background-color: #f0f2f5;
-  padding: 20px;
+  padding: 24px;
+  overflow-y: auto;
 }
 
 /* fade-transform */

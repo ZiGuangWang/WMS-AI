@@ -128,5 +128,8 @@ const handleLogin = async () => {
   width: 100%;
   font-weight: 600;
   letter-spacing: 2px;
+  height: 44px;
+  background-color: #1890ff;
+  border-color: #1890ff;
 }
 </style>

@@ -25,7 +25,7 @@
         border
         fit
         highlight-current-row
-        style="width: 100%; margin-top: 20px;"
+        style="width: 100%;"
       >
         <el-table-column label="货品名称" prop="goods_name" align="center" />
         <el-table-column label="SKU编码" prop="sku" align="center" />
@@ -120,16 +120,8 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.app-container {
-  padding: 20px;
-}
 .filter-container {
-  margin-bottom: 20px;
-}
-.pagination-container {
-  margin-top: 30px;
-  display: flex;
-  justify-content: flex-end;
+  margin-bottom: 16px;
 }
 .text-danger {
   color: #f56c6c;

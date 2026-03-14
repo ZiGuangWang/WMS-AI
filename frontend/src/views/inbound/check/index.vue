@@ -19,7 +19,7 @@
         border
         fit
         highlight-current-row
-        style="width: 100%; margin-top: 20px;"
+        style="width: 100%;"
       >
         <el-table-column label="入库单号" prop="order_no" align="center" width="180" />
         <el-table-column label="类型" prop="type" align="center" width="120" />
@@ -251,15 +251,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.app-container {
-  padding: 20px;
-}
 .filter-container {
-  margin-bottom: 20px;
-}
-.pagination-container {
-  margin-top: 30px;
-  display: flex;
-  justify-content: flex-end;
+  margin-bottom: 16px;
 }
 </style>

@@ -5,28 +5,28 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <template #header>今日入库单</template>
-          <div class="stat-value">12</div>
-          <div class="stat-footer">较昨日 +2</div>
+          <div class="stat-value">{{ stats.today_inbound }}</div>
+          <div class="stat-footer">健康</div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <template #header>今日出库单</template>
-          <div class="stat-value">8</div>
-          <div class="stat-footer">较昨日 -1</div>
+          <div class="stat-value">{{ stats.today_outbound }}</div>
+          <div class="stat-footer">健康</div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <template #header>库存总量</template>
-          <div class="stat-value">2,540</div>
-          <div class="stat-footer">健康</div>
+          <div class="stat-value">{{ stats.inventory_total }}</div>
+          <div class="stat-footer">实时数据</div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card warning">
           <template #header>库存预警</template>
-          <div class="stat-value">5</div>
+          <div class="stat-value">{{ stats.warning_count }}</div>
           <div class="stat-footer">需要及时处理</div>
         </el-card>
       </el-col>
@@ -62,18 +62,22 @@
             </div>
           </template>
           <el-table :data="warningList" style="width: 100%">
-            <el-table-column prop="goodsName" label="货品名称" />
+            <el-table-column prop="goods_name" label="货品名称" />
             <el-table-column prop="sku" label="规格型号" />
-            <el-table-column prop="currentStock" label="当前库存">
+            <el-table-column prop="current_stock" label="当前库存">
               <template #default="scope">
-                <span class="text-danger">{{ scope.row.currentStock }}</span>
+                <span class="text-danger">{{ scope.row.current_stock }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="minStock" label="安全库存" />
-            <el-table-column prop="location" label="建议补货库位" />
+            <el-table-column prop="min_stock" label="安全库存" />
+            <el-table-column label="状态">
+              <template #default="scope">
+                <el-tag type="danger" size="small">{{ scope.row.status }}</el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="120">
               <template #default>
-                <el-button link type="primary">去补货</el-button>
+                <el-button link type="primary" @click="router.push('/inbound/order')">去补货</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -84,16 +88,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { getStats } from '@/api/dashboard'
+import { getInventoryWarning } from '@/api/inventory'
 
 const router = useRouter()
 
-const warningList = ref([
-  { goodsName: '不锈钢螺丝', sku: 'M6*20', currentStock: 45, minStock: 100, location: 'A-01-02' },
-  { goodsName: '锂电池', sku: '3.7V 2000mAh', currentStock: 12, minStock: 50, location: 'B-02-01' },
-  { goodsName: '铝型材', sku: '2020 1000mm', currentStock: 5, minStock: 20, location: 'C-01-05' }
-])
+const stats = reactive({
+  today_inbound: 0,
+  today_outbound: 0,
+  inventory_total: 0,
+  warning_count: 0
+})
+
+const warningList = ref<any[]>([])
+
+const loadData = async () => {
+  try {
+    const statsRes: any = await getStats()
+    Object.assign(stats, statsRes)
+    
+    const warningRes: any = await getInventoryWarning()
+    warningList.value = warningRes.slice(0, 5) // Just show top 5
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped lang="scss">

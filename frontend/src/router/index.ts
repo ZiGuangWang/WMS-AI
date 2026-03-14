@@ -47,6 +47,18 @@ const routes: Array<RouteRecordRaw> = [
         name: 'InboundCheck',
         component: () => import('../views/inbound/check/index.vue'),
         meta: { title: '货物验收' }
+      },
+      {
+        path: 'outbound/order',
+        name: 'OutboundOrder',
+        component: () => import('../views/outbound/order/index.vue'),
+        meta: { title: '出库单管理' }
+      },
+      {
+        path: 'outbound/review',
+        name: 'OutboundReview',
+        component: () => import('../views/outbound/review/index.vue'),
+        meta: { title: '货物复核' }
       }
     ]
   }

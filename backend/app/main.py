@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.mongodb import connect_to_mongo, close_mongo_connection
+from app.api.v1.api import api_router
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -27,6 +28,8 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():

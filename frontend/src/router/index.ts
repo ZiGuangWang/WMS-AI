@@ -17,6 +17,24 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Dashboard',
         component: () => import('../views/dashboard/index.vue'),
         meta: { title: '控制台首页', icon: 'Dashboard' }
+      },
+      {
+        path: 'basic/goods',
+        name: 'Goods',
+        component: () => import('../views/basic/goods/index.vue'),
+        meta: { title: '货品管理' }
+      },
+      {
+        path: 'basic/location',
+        name: 'Location',
+        component: () => import('../views/basic/location/index.vue'),
+        meta: { title: '库位管理' }
+      },
+      {
+        path: 'basic/supplier',
+        name: 'Supplier',
+        component: () => import('../views/basic/supplier/index.vue'),
+        meta: { title: '供应商管理' }
       }
     ]
   }

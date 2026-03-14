@@ -67,6 +67,7 @@
               <span class="order-no">{{ record.order_no }}</span>
             </template>
           </a-table-column>
+          <a-table-column title="批次号" data-index="batch_no" :width="150" align="center" />
           <a-table-column title="类型" :width="100" align="center">
             <template #cell="{ record }">
               <a-tag :color="getTypeTagColor(record.type)" bordered>{{ record.type }}</a-tag>
@@ -123,7 +124,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { getInventoryHistory, adjustInventory } from '@/api/inventory'
+import { getInventoryLogs, adjustInventory } from '@/api/inventory'
 import { getGoodsList, getLocationList } from '@/api/basic'
 import { Message } from '@arco-design/web-vue'
 
@@ -164,7 +165,7 @@ const rules = {
 const getList = async () => {
   listLoading.value = true
   try {
-    const response: any = await getInventoryHistory({
+    const response: any = await getInventoryLogs({
       ...listQuery,
       skip: (listQuery.page - 1) * listQuery.limit
     })

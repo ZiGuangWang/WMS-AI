@@ -17,6 +17,7 @@ async def query_inventory(
     goods_name: Optional[str] = None,
     sku: Optional[str] = None,
     location_code: Optional[str] = None,
+    batch_no: Optional[str] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=1000),
     db: AsyncIOMotorDatabase = Depends(get_database)
@@ -25,6 +26,7 @@ async def query_inventory(
     if goods_name: query["goods_name"] = {"$regex": goods_name, "$options": "i"}
     if sku: query["sku"] = {"$regex": sku, "$options": "i"}
     if location_code: query["location_code"] = {"$regex": location_code, "$options": "i"}
+    if batch_no: query["batch_no"] = {"$regex": batch_no, "$options": "i"}
     return await inventory_crud.get_all(db, query, skip, limit)
 
 @router.get("/warning")
@@ -126,6 +128,7 @@ async def adjust_inventory(
         "goods_id": goods_id,
         "goods_name": goods_name if inv else goods["name"],
         "sku": sku if inv else goods["sku"],
+        "batch_no": inv.get("batch_no") if inv else None,
         "type": "调整",
         "order_no": f"ADJ{datetime.now().strftime('%Y%m%d%H%M%S')}",
         "location_id": location_id,

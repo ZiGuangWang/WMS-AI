@@ -28,6 +28,9 @@
         <a-form-item label="库位编码">
           <a-input v-model="listQuery.location_code" placeholder="输入库位编码" allow-clear @keyup.enter="handleFilter" />
         </a-form-item>
+        <a-form-item label="批次号">
+          <a-input v-model="listQuery.batch_no" placeholder="输入批次号" allow-clear @keyup.enter="handleFilter" />
+        </a-form-item>
         <a-form-item>
           <a-space>
             <a-button type="primary" @click="handleFilter">
@@ -69,6 +72,7 @@
               <a-tag bordered>{{ record.location_code }}</a-tag>
             </template>
           </a-table-column>
+          <a-table-column title="批次号" data-index="batch_no" :width="150" align="center" />
           <a-table-column title="当前库存" :width="120" align="center">
             <template #cell="{ record }">
               <span :class="['quantity-text', record.quantity === 0 ? 'text-danger' : 'text-primary']">
@@ -108,7 +112,8 @@ const listQuery = reactive({
   limit: 20,
   goods_name: undefined,
   sku: undefined,
-  location_code: undefined
+  location_code: undefined,
+  batch_no: undefined
 })
 
 const pagination = computed(() => ({
@@ -144,6 +149,7 @@ const resetQuery = () => {
   listQuery.goods_name = undefined
   listQuery.sku = undefined
   listQuery.location_code = undefined
+  listQuery.batch_no = undefined
   handleFilter()
 }
 

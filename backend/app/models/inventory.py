@@ -20,6 +20,7 @@ class InventoryLog(MongoBaseModel):
     goods_id: str
     goods_name: str
     sku: str
+    batch_no: Optional[str] = None
     type: str  # 入库, 出库, 调整, 盘点
     order_no: Optional[str] = None
     location_id: str

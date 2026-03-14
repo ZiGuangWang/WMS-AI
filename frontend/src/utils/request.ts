@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
+import { Message } from '@arco-design/web-vue'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API || '/api/v1',
@@ -29,9 +29,8 @@ service.interceptors.response.use(
     if (error.response && error.response.data && error.response.data.detail) {
       message = error.response.data.detail
     }
-    ElMessage({
-      message: message,
-      type: 'error',
+    Message.error({
+      content: message,
       duration: 5 * 1000
     })
     return Promise.reject(error)

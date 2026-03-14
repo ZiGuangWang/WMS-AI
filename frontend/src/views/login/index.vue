@@ -81,9 +81,8 @@ const handleLogin = async ({ values, errors }: any) => {
     Message.success('登录成功，欢迎回来')
     router.push('/')
   } catch (error: any) {
-    console.error(error)
-    const errorMsg = error.response?.data?.detail || '登录失败，请检查账号信息'
-    Message.error(errorMsg)
+    console.error('登录请求异常:', error)
+    // 错误提示已在 request.ts 拦截器中统一处理，此处无需重复弹出 Message
   } finally {
     loading.value = false
   }

@@ -23,7 +23,15 @@ async def close_mongo_connection():
     logging.info("MongoDB connection closed!")
 
 def get_database():
+    if db.db is None:
+        # Fallback for scripts or cases where lifespan didn't run
+        client = AsyncIOMotorClient(settings.MONGODB_URI)
+        db.db = client[settings.DATABASE_NAME]
     return db.db
 
 def get_perm_database():
+    if db.perm_db is None:
+        # Fallback for PermiHub-AI database
+        client = AsyncIOMotorClient(settings.MONGODB_URI)
+        db.perm_db = client["permission_manager"]
     return db.perm_db

@@ -21,8 +21,11 @@ async def login(
     data: LoginRequest,
     db: AsyncIOMotorDatabase = Depends(get_perm_database)
 ) -> Any:
-    # 查找 PermiHub-AI 的 accounts 集合中的用户
-    user = await db["accounts"].find_one({"username": data.username})
+    # 查找 PermiHub-AI 的 accounts 集合中的用户 (不区分大小写并去除首尾空格)
+    username = data.username.strip()
+    
+    # 使用正则表达式进行不区分大小写的查找
+    user = await db["accounts"].find_one({"username": {"$regex": f"^{username}$", "$options": "i"}})
     
     if not user:
         raise HTTPException(
@@ -32,15 +35,16 @@ async def login(
         )
         
     # 验证密码（PermiHub-AI 使用 bcrypt 加密）
-    if not verify_password(data.password, user["password"]):
+    hashed_password = user.get("password")
+    if not verify_password(data.password, hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户名或密码错误",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # 检查状态
-    if user.get("status") == 0:
+    # 检查状态 (确保 status 为 1)
+    if user.get("status") != 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="账号已停用",

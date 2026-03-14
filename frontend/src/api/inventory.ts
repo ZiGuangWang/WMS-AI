@@ -19,7 +19,7 @@ export function adjustInventory(data: any) {
   return request({
     url: '/inventory/adjust',
     method: 'post',
-    params: data
+    data: data
   })
 }
 

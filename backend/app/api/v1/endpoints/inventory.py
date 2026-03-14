@@ -69,12 +69,17 @@ async def get_inventory_warning(
 
 @router.post("/adjust")
 async def adjust_inventory(
-    goods_id: str,
-    location_id: str,
-    adjust_quantity: int,  # positive for add, negative for sub
-    remark: str = "",
+    data: dict,
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
+    goods_id = data.get("goods_id")
+    location_id = data.get("location_id")
+    adjust_quantity = data.get("adjust_quantity")
+    remark = data.get("remark", "")
+    
+    if not all([goods_id, location_id, adjust_quantity is not None]):
+        raise HTTPException(status_code=400, detail="Missing required fields")
+        
     inv = await db["inventory"].find_one({
         "goods_id": goods_id,
         "location_id": location_id

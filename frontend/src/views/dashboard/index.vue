@@ -19,9 +19,13 @@
               </svg>
             </div>
           </div>
-          <div class="stat-value">{{ stats.today_inbound }}</div>
+          <div class="stat-value">{{ stats.today_inbound.value }}</div>
           <div class="stat-footer">
-            <span class="trend up"><icon-caret-up /> +12%</span>
+            <span :class="['trend', stats.today_inbound.status]" :style="{ visibility: stats.today_inbound.trend === 0 ? 'hidden' : 'visible' }">
+              <icon-caret-up v-if="stats.today_inbound.status === 'up'" />
+              <icon-caret-down v-if="stats.today_inbound.status === 'down'" />
+              {{ stats.today_inbound.trend > 0 ? '+' : '' }}{{ stats.today_inbound.trend }}%
+            </span>
           </div>
         </a-card>
       </a-col>
@@ -37,9 +41,13 @@
               </svg>
             </div>
           </div>
-          <div class="stat-value">{{ stats.today_outbound }}</div>
+          <div class="stat-value">{{ stats.today_outbound.value }}</div>
           <div class="stat-footer">
-            <span class="trend down"><icon-caret-down /> -8%</span>
+            <span :class="['trend', stats.today_outbound.status]" :style="{ visibility: stats.today_outbound.trend === 0 ? 'hidden' : 'visible' }">
+              <icon-caret-up v-if="stats.today_outbound.status === 'up'" />
+              <icon-caret-down v-if="stats.today_outbound.status === 'down'" />
+              {{ stats.today_outbound.trend > 0 ? '+' : '' }}{{ stats.today_outbound.trend }}%
+            </span>
           </div>
         </a-card>
       </a-col>
@@ -55,9 +63,13 @@
               </svg>
             </div>
           </div>
-          <div class="stat-value">{{ stats.inventory_total }}</div>
+          <div class="stat-value">{{ stats.inventory_total.value }}</div>
           <div class="stat-footer">
-            <span class="trend neutral">稳定</span>
+            <span :class="['trend', stats.inventory_total.status]" :style="{ visibility: stats.inventory_total.trend === 0 ? 'hidden' : 'visible' }">
+              <icon-caret-up v-if="stats.inventory_total.status === 'up'" />
+              <icon-caret-down v-if="stats.inventory_total.status === 'down'" />
+              {{ stats.inventory_total.trend > 0 ? '+' : '' }}{{ stats.inventory_total.trend }}%
+            </span>
           </div>
         </a-card>
       </a-col>
@@ -67,9 +79,13 @@
             <span class="label">库存预警数量</span>
             <div class="icon-wrapper orange"><icon-exclamation-circle-fill /></div>
           </div>
-          <div class="stat-value">{{ stats.warning_count }}</div>
+          <div class="stat-value">{{ stats.warning_count.value }}</div>
           <div class="stat-footer">
-            <span class="trend up"><icon-caret-up /> +12%</span>
+            <span :class="['trend', stats.warning_count.status]" :style="{ visibility: stats.warning_count.trend === 0 ? 'hidden' : 'visible' }">
+              <icon-caret-up v-if="stats.warning_count.status === 'up'" />
+              <icon-caret-down v-if="stats.warning_count.status === 'down'" />
+              {{ stats.warning_count.trend > 0 ? '+' : '' }}{{ stats.warning_count.trend }}%
+            </span>
           </div>
         </a-card>
       </a-col>
@@ -158,10 +174,10 @@ import { Message } from '@arco-design/web-vue'
 const router = useRouter()
 
 const stats = reactive({
-  today_inbound: 0,
-  today_outbound: 0,
-  inventory_total: 0,
-  warning_count: 0
+  today_inbound: { value: 0, trend: 0, status: 'neutral' },
+  today_outbound: { value: 0, trend: 0, status: 'neutral' },
+  inventory_total: { value: 0, trend: 0, status: 'neutral' },
+  warning_count: { value: 0, trend: 0, status: 'neutral' }
 })
 
 const warningList = ref<any[]>([])

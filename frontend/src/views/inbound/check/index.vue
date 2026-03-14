@@ -96,7 +96,7 @@
             <el-table-column label="实收数量" prop="received_quantity" width="100" align="center" />
             <el-table-column label="上架库位" width="250" align="center">
               <template #default="scope">
-                <el-select v-model="scope.row.location_id" placeholder="选择上架库位" style="width: 100%">
+                <el-select v-model="scope.row.location_id" placeholder="选择上架库位" @change="(val) => handleLocationChange(val, scope.$index)" style="width: 100%">
                   <el-option v-for="loc in locationOptions" :key="loc._id" :label="loc.code" :value="loc._id" />
                 </el-select>
               </template>
@@ -124,8 +124,7 @@ const listLoading = ref(true)
 const listQuery = reactive({
   page: 1,
   limit: 20,
-  order_no: undefined,
-  status: undefined
+  order_no: undefined
 })
 
 const checkDialogVisible = ref(false)
@@ -145,7 +144,7 @@ const getList = async () => {
       ...listQuery,
       skip: (listQuery.page - 1) * listQuery.limit
     })
-    // Only show orders in Receipt (2) or Shelving (3) status
+    // 过滤掉待审核(1)和已完成(4)的单据
     list.value = response.filter((o: any) => o.status === 2 || o.status === 3)
     total.value = list.value.length
   } catch (error) {
@@ -190,6 +189,13 @@ const handleShelve = (row: any) => {
   shelveDialogVisible.value = true
 }
 
+const handleLocationChange = (val: string, index: number) => {
+  const loc = locationOptions.value.find(l => l._id === val)
+  if (loc) {
+    temp.items[index].location_code = loc.code
+  }
+}
+
 const confirmCheck = async () => {
   try {
     await receiveInboundGoods(temp._id, temp.items)
@@ -210,7 +216,7 @@ const confirmShelve = async () => {
   }
   
   try {
-    // First update the order items with location IDs
+    // First update the order items with location IDs and codes
     await updateInboundOrder(temp._id, { items: temp.items })
     // Then call shelve
     await shelveInboundGoods(temp._id)
@@ -236,16 +242,6 @@ const getStatusLabel = (status: number) => {
     3: '待上架'
   }
   return map[status] || '未知'
-}
-
-const handleSizeChange = (val: number) => {
-  listQuery.limit = val
-  getList()
-}
-
-const handleCurrentChange = (val: number) => {
-  listQuery.page = val
-  getList()
 }
 
 onMounted(() => {

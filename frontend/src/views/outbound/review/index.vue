@@ -111,7 +111,8 @@
             <template #columns>
               <a-table-column title="货品名称" data-index="goods_name" :min-width="150" />
               <a-table-column title="SKU" data-index="sku" :width="120" align="center" />
-              <a-table-column title="计划数量" data-index="planned_quantity" :width="100" align="center">
+            <a-table-column title="批次号" data-index="batch_no" :width="150" align="center" />
+            <a-table-column title="计划数量" data-index="planned_quantity" :width="100" align="center">
                 <template #cell="{ record }">
                   <span class="quantity-text">{{ record.planned_quantity }}</span>
                 </template>

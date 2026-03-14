@@ -11,6 +11,8 @@ class InboundItem(BaseModel):
     received_quantity: int = 0
     location_id: Optional[str] = None
     price: float = 0.0
+    batch_no: Optional[str] = None
+    expiry_date: Optional[datetime] = None
 
 class InboundOrder(MongoBaseModel):
     order_no: str = Field(unique=True)

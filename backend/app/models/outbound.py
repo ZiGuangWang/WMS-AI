@@ -11,6 +11,7 @@ class OutboundItem(BaseModel):
     picked_quantity: int = 0
     location_id: Optional[str] = None
     location_code: Optional[str] = None
+    batch_no: Optional[str] = None
 
 class OutboundOrder(MongoBaseModel):
     order_no: str = Field(unique=True)

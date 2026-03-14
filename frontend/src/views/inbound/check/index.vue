@@ -117,6 +117,11 @@
                   <a-input-number v-model="record.received_quantity" :min="0" :max="record.planned_quantity" size="small" />
                 </template>
               </a-table-column>
+              <a-table-column title="批次号" :width="150" align="center">
+                <template #cell="{ record }">
+                  <a-input v-model="record.batch_no" placeholder="输入批次" size="small" />
+                </template>
+              </a-table-column>
             </template>
           </a-table>
         </div>

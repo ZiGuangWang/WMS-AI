@@ -1,111 +1,151 @@
 <template>
   <div class="app-container">
-    <el-card class="filter-container" shadow="never">
-      <el-form :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-form-item label="库位编码">
-          <el-input v-model="listQuery.code" placeholder="请输入库位编码" clearable @keyup.enter="handleFilter" />
-        </el-form-item>
-        <el-form-item label="所属库区">
-          <el-select v-model="listQuery.area" placeholder="请选择库区" clearable>
-            <el-option label="A区" value="Area A" />
-            <el-option label="B区" value="Area B" />
-            <el-option label="C区" value="Area C" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleFilter">查询</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <div class="header-section">
+      <h1 class="page-title">库位管理</h1>
+    </div>
 
-    <el-card class="table-container" shadow="never">
-      <template #header>
-        <div class="card-header">
-          <el-button type="primary" icon="Plus" @click="handleAdd">新增库位</el-button>
-        </div>
-      </template>
+    <a-card class="action-card" :bordered="false">
+      <a-space>
+        <a-button type="primary" @click="handleAdd">
+          <template #icon><icon-plus /></template>
+          新增库位
+        </a-button>
+        <a-button>
+          <template #icon><icon-upload /></template>
+          导入
+        </a-button>
+        <a-button>
+          <template #icon><icon-download /></template>
+          导出
+        </a-button>
+      </a-space>
+    </a-card>
 
-      <el-table
-        v-loading="listLoading"
+    <a-card class="filter-card" :bordered="false">
+      <a-form :model="listQuery" layout="inline" @submit="handleFilter">
+        <a-form-item label="库房">
+          <a-select v-model="listQuery.warehouse" placeholder="选择库房" allow-clear style="width: 160px">
+            <a-option label="主仓库" value="主仓库" />
+            <a-option label="辅助仓库" value="辅助仓库" />
+          </a-select>
+        </a-form-item>
+        <a-form-item label="区域">
+          <a-select v-model="listQuery.area" placeholder="选择区域" allow-clear style="width: 160px">
+            <a-option label="A区冷成型" value="A区冷成型" />
+            <a-option label="B区成品" value="B区成品" />
+            <a-option label="维修件区" value="维修件区" />
+          </a-select>
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="listQuery.status" placeholder="选择状态" allow-clear style="width: 140px">
+            <a-option label="空闲" :value="1" />
+            <a-option label="占用" :value="2" />
+            <a-option label="禁用" :value="0" />
+          </a-select>
+        </a-form-item>
+        <a-form-item label="库位编码">
+          <a-input v-model="listQuery.code" placeholder="输入库位编码" allow-clear style="width: 180px" />
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleFilter">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button @click="resetQuery">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </a-card>
+
+    <a-card class="table-card" :bordered="false">
+      <a-table
+        :loading="listLoading"
         :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%;"
+        :pagination="pagination"
+        row-key="_id"
+        @page-change="handleCurrentChange"
+        @page-size-change="handleSizeChange"
       >
-        <el-table-column label="库位编码" prop="code" align="center" />
-        <el-table-column label="所属库区" prop="area" align="center" />
-        <el-table-column label="货架号" prop="shelf" align="center" />
-        <el-table-column label="货位号" prop="bin" align="center" />
-        <el-table-column label="状态" align="center">
-          <template #default="scope">
-            <el-tag :type="getStatusType(scope.row.status)">
-              {{ getStatusLabel(scope.row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="备注" prop="remark" align="center" />
-        <el-table-column label="操作" align="center" width="200">
-          <template #default="scope">
-            <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-container">
-        <el-pagination
-          :current-page="listQuery.page"
-          :page-sizes="[10, 20, 30, 50]"
-          :page-size="listQuery.limit"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
+        <template #columns>
+          <a-table-column title="库位编码" data-index="code" :width="120" />
+          <a-table-column title="库房" data-index="warehouse" :width="150" />
+          <a-table-column title="区域" data-index="area" :width="180" />
+          <a-table-column title="状态" align="center" :width="120">
+            <template #cell="{ record }">
+              <a-tag :color="getLocationStatusColor(record.status)" bordered>
+                {{ getLocationStatusLabel(record.status) }}
+              </a-tag>
+            </template>
+          </a-table-column>
+          <a-table-column title="操作" align="center" :width="180">
+            <template #cell="{ record }">
+              <a-space>
+                <a-button type="text" size="small" @click="handleEdit(record)">
+                  <template #icon><icon-edit /></template>
+                  编辑
+                </a-button>
+                <a-button type="text" status="danger" size="small" @click="handleDelete(record)">
+                  <template #icon><icon-delete /></template>
+                  删除
+                </a-button>
+              </a-space>
+            </template>
+          </a-table-column>
+        </template>
+      </a-table>
+    </a-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form ref="dataFormRef" :model="temp" :rules="rules" label-width="100px" style="width: 400px;">
-        <el-form-item label="库位编码" prop="code">
-          <el-input v-model="temp.code" placeholder="如: A-01-01" />
-        </el-form-item>
-        <el-form-item label="所属库区" prop="area">
-          <el-input v-model="temp.area" placeholder="如: Area A" />
-        </el-form-item>
-        <el-form-item label="货架号" prop="shelf">
-          <el-input v-model="temp.shelf" placeholder="如: 01" />
-        </el-form-item>
-        <el-form-item label="货位号" prop="bin">
-          <el-input v-model="temp.bin" placeholder="如: 01" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="temp.status" placeholder="请选择状态">
-            <el-option label="空置" :value="1" />
-            <el-option label="部分占用" :value="2" />
-            <el-option label="满载" :value="3" />
-            <el-option label="禁用" :value="0" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="temp.remark" type="textarea" placeholder="请输入备注" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmData">确认</el-button>
-      </template>
-    </el-dialog>
+    <a-modal
+      :visible="dialogVisible"
+      :title="dialogTitle"
+      @cancel="dialogVisible = false"
+      @before-ok="confirmData"
+      width="500px"
+    >
+      <a-form ref="dataFormRef" :model="temp" :rules="rules" auto-label-width>
+        <a-form-item label="库位编码" field="code">
+          <a-input v-model="temp.code" placeholder="如: A-01-01" />
+        </a-form-item>
+        <a-form-item label="所属库区" field="area">
+          <a-input v-model="temp.area" placeholder="如: Area A" />
+        </a-form-item>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="货架号" field="shelf">
+              <a-input v-model="temp.shelf" placeholder="如: 01" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="货位号" field="bin">
+              <a-input v-model="temp.bin" placeholder="如: 01" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-form-item label="状态" field="status">
+          <a-select v-model="temp.status" placeholder="请选择状态">
+            <a-option label="空置" :value="1" />
+            <a-option label="部分占用" :value="2" />
+            <a-option label="满载" :value="3" />
+            <a-option label="禁用" :value="0" />
+          </a-select>
+        </a-form-item>
+        <a-form-item label="备注" field="remark">
+          <a-textarea v-model="temp.remark" placeholder="请输入备注" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { getLocationList, createLocation, updateLocation, deleteLocation } from '@/api/basic'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { Message, Modal } from '@arco-design/web-vue'
 
 const list = ref([])
 const total = ref(0)
@@ -114,8 +154,18 @@ const listQuery = reactive({
   page: 1,
   limit: 20,
   code: undefined,
-  area: undefined
+  area: undefined,
+  warehouse: undefined,
+  status: undefined
 })
+
+const pagination = computed(() => ({
+  total: total.value,
+  current: listQuery.page,
+  pageSize: listQuery.limit,
+  showTotal: true,
+  showPageSize: true
+}))
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
@@ -131,8 +181,8 @@ const temp = reactive({
 })
 
 const rules = {
-  code: [{ required: true, message: '库位编码是必填项', trigger: 'blur' }],
-  area: [{ required: true, message: '所属库区是必填项', trigger: 'blur' }]
+  code: [{ required: true, message: '库位编码是必填项' }],
+  area: [{ required: true, message: '所属库区是必填项' }]
 }
 
 const getList = async () => {
@@ -159,16 +209,18 @@ const handleFilter = () => {
 const resetQuery = () => {
   listQuery.code = undefined
   listQuery.area = undefined
+  listQuery.warehouse = undefined
+  listQuery.status = undefined
   handleFilter()
 }
 
-const handleSizeChange = (val: number) => {
-  listQuery.limit = val
+const handleSizeChange = (pageSize: number) => {
+  listQuery.limit = pageSize
   getList()
 }
 
-const handleCurrentChange = (val: number) => {
-  listQuery.page = val
+const handleCurrentChange = (current: number) => {
+  listQuery.page = current
   getList()
 }
 
@@ -197,17 +249,35 @@ const handleEdit = (row: any) => {
 }
 
 const confirmData = async () => {
-  await dataFormRef.value.validate(async (valid: boolean) => {
-    if (valid) {
+  const errors = await dataFormRef.value?.validate()
+  if (!errors) {
+    try {
+      if (temp._id) {
+        await updateLocation(temp._id, temp)
+        Message.success('更新成功')
+      } else {
+        await createLocation(temp)
+        Message.success('创建成功')
+      }
+      dialogVisible.value = false
+      getList()
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  }
+  return false
+}
+
+const handleDelete = (row: any) => {
+  Modal.confirm({
+    title: '提示',
+    content: '确认删除该库位吗?',
+    onOk: async () => {
       try {
-        if (temp._id) {
-          await updateLocation(temp._id, temp)
-          ElMessage.success('更新成功')
-        } else {
-          await createLocation(temp)
-          ElMessage.success('创建成功')
-        }
-        dialogVisible.value = false
+        await deleteLocation(row._id)
+        Message.success('删除成功')
         getList()
       } catch (error) {
         console.error(error)
@@ -216,29 +286,17 @@ const confirmData = async () => {
   })
 }
 
-const handleDelete = (row: any) => {
-  ElMessageBox.confirm('确认删除该库位吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-    await deleteLocation(row._id)
-    ElMessage.success('删除成功')
-    getList()
-  })
-}
-
-const getStatusType = (status: number) => {
+const getLocationStatusColor = (status: number) => {
   const map: any = {
-    1: 'info',
-    2: 'warning',
-    3: 'success',
-    0: 'danger'
+    1: 'green',
+    2: 'orange',
+    3: 'red',
+    0: 'gray'
   }
-  return map[status] || 'info'
+  return map[status] || 'gray'
 }
 
-const getStatusLabel = (status: number) => {
+const getLocationStatusLabel = (status: number) => {
   const map: any = {
     1: '空置',
     2: '部分占用',
@@ -254,12 +312,25 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.filter-container {
+.header-section {
+  margin-bottom: 24px;
+  .page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1d2129;
+    margin: 0;
+  }
+}
+
+.action-card {
   margin-bottom: 16px;
 }
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+.filter-card {
+  margin-bottom: 16px;
+}
+
+.table-card {
+  background-color: #fff;
 }
 </style>

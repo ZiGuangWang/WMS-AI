@@ -1,53 +1,57 @@
 <template>
   <div class="login-container">
-    <el-card class="login-card shadow-lg">
+    <a-card :bordered="false" class="login-card">
       <div class="login-header">
-        <el-icon size="40" color="#409EFF"><Box /></el-icon>
-        <h2>WMS-AI 仓库管理系统</h2>
-      </div>
-      <el-form :model="loginForm" :rules="rules" ref="loginFormRef" class="login-form">
-        <el-form-item prop="username">
-          <el-input
-            v-model="loginForm.username"
-            placeholder="用户名"
-            prefix-icon="User"
-            size="large"
-          />
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="密码"
-            prefix-icon="Lock"
-            show-password
-            size="large"
-          />
-        </el-form-item>
-        <div class="form-options">
-          <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
-          <el-link type="primary" :underline="false">忘记密码？</el-link>
+        <div class="logo-wrapper">
+          <icon-apps :size="48" style="color: #165dff" />
         </div>
-        <el-form-item>
-          <el-button
+        <h2 class="title">智云仓储管理系统</h2>
+        <p class="subtitle">WMS-AI Smart Warehouse Solution</p>
+      </div>
+      
+      <a-form :model="loginForm" ref="loginFormRef" class="login-form" layout="vertical" @submit="handleLogin">
+        <a-form-item field="username" :rules="[{ required: true, message: '请输入用户名' }]">
+          <a-input v-model="loginForm.username" placeholder="用户名" size="large">
+            <template #prefix><icon-user /></template>
+          </a-input>
+        </a-form-item>
+        
+        <a-form-item field="password" :rules="[{ required: true, message: '请输入密码' }]">
+          <a-input-password v-model="loginForm.password" placeholder="密码" size="large">
+            <template #prefix><icon-lock /></template>
+          </a-input-password>
+        </a-form-item>
+        
+        <div class="form-options">
+          <a-checkbox v-model="loginForm.remember">记住密码</a-checkbox>
+          <a-link type="primary" :underline="false">忘记密码？</a-link>
+        </div>
+        
+        <a-form-item>
+          <a-button
             type="primary"
             class="login-button"
             size="large"
             :loading="loading"
-            @click="handleLogin"
+            long
+            html-type="submit"
           >
             登录
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+          </a-button>
+        </a-form-item>
+      </a-form>
+      
+      <div class="login-footer">
+        <p>© 2024 WMS-AI Pro Warehouse Management</p>
+      </div>
+    </a-card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { Message } from '@arco-design/web-vue'
 
 const router = useRouter()
 const loginFormRef = ref()
@@ -59,30 +63,21 @@ const loginForm = reactive({
   remember: false
 })
 
-const rules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
-}
-
-const handleLogin = async () => {
-  if (!loginFormRef.value) return
+const handleLogin = async ({ values, errors }: any) => {
+  if (errors) return
   
-  await loginFormRef.value.validate(async (valid: boolean) => {
-    if (valid) {
-      loading.value = true
-      try {
-        // 模拟登录
-        setTimeout(() => {
-          loading.value = false
-          ElMessage.success('登录成功')
-          router.push('/')
-        }, 1000)
-      } catch (error) {
-        loading.value = false
-        ElMessage.error('登录失败，请检查用户名或密码')
-      }
-    }
-  })
+  loading.value = true
+  try {
+    // 模拟登录逻辑
+    setTimeout(() => {
+      loading.value = false
+      Message.success('登录成功，欢迎回来')
+      router.push('/')
+    }, 800)
+  } catch (error) {
+    loading.value = false
+    Message.error('登录失败，请检查网络或账号信息')
+  }
 }
 </script>
 
@@ -92,44 +87,76 @@ const handleLogin = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f0f2f5;
-  background-image: radial-gradient(#e1e4e8 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-color: #f2f3f5;
+  background-image: linear-gradient(135deg, #e5e6eb 0%, #f2f3f5 100%);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, rgba(22, 93, 255, 0.05) 0%, transparent 70%);
+    z-index: 1;
+  }
 }
 
 .login-card {
-  width: 450px;
-  padding: 20px;
-  border-radius: 8px;
+  width: 420px;
+  background: #ffffff;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  border-radius: 12px;
+  z-index: 10;
+  
+  :deep(.arco-card-body) {
+    padding: 40px;
+  }
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 30px;
-  h2 {
-    margin-top: 15px;
-    color: #303133;
-    font-weight: 600;
+  margin-bottom: 40px;
+  
+  .logo-wrapper {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: center;
   }
-}
-
-.login-form {
-  padding: 0 10px;
+  
+  .title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1d2129;
+    margin: 0 0 8px 0;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    color: #86909c;
+    margin: 0;
+  }
 }
 
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .login-button {
-  width: 100%;
   font-weight: 600;
-  letter-spacing: 2px;
-  height: 44px;
-  background-color: #1890ff;
-  border-color: #1890ff;
+}
+
+.login-footer {
+  margin-top: 40px;
+  text-align: center;
+  p {
+    font-size: 12px;
+    color: #86909c;
+  }
 }
 </style>

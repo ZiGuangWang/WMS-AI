@@ -1,122 +1,183 @@
 <template>
   <div class="app-container">
-    <el-card class="filter-container" shadow="never">
-      <el-form :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-form-item label="入库单号">
-          <el-input v-model="listQuery.order_no" placeholder="请输入入库单号" clearable @keyup.enter="handleFilter" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleFilter">查询</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <div class="header-section">
+      <h1 class="page-title">入库验收</h1>
+    </div>
 
-    <el-card class="table-container" shadow="never">
-      <el-table
-        v-loading="listLoading"
+    <a-card class="action-card" :bordered="false">
+      <a-space>
+        <a-button @click="handleExport">
+          <template #icon><icon-download /></template>
+          导出验收单
+        </a-button>
+        <a-button @click="handlePrint">
+          <template #icon><icon-printer /></template>
+          打印入库单
+        </a-button>
+      </a-space>
+    </a-card>
+
+    <a-card class="filter-card" :bordered="false">
+      <a-form :model="listQuery" layout="inline" @submit="handleFilter">
+        <a-form-item label="入库单号">
+          <a-input v-model="listQuery.order_no" placeholder="输入入库单号" allow-clear @keyup.enter="handleFilter" />
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleFilter">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button @click="resetQuery">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </a-card>
+
+    <a-card class="table-card" :bordered="false">
+      <a-table
+        :loading="listLoading"
         :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%;"
+        :pagination="pagination"
+        row-key="_id"
+        @page-change="handleCurrentChange"
+        @page-size-change="handleSizeChange"
       >
-        <el-table-column label="入库单号" prop="order_no" align="center" width="180" />
-        <el-table-column label="类型" prop="type" align="center" width="120" />
-        <el-table-column label="供应商" prop="supplier_name" align="center" />
-        <el-table-column label="状态" align="center" width="120">
-          <template #default="scope">
-            <el-tag :type="getStatusType(scope.row.status)">
-              {{ getStatusLabel(scope.row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="220">
-          <template #default="scope">
-            <el-button v-if="scope.row.status === 2" link type="primary" icon="Box" @click="handleCheck(scope.row)">验收货物</el-button>
-            <el-button v-if="scope.row.status === 3" link type="success" icon="Position" @click="handleShelve(scope.row)">确认上架</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-container">
-        <el-pagination
-          :current-page="listQuery.page"
-          :page-sizes="[10, 20, 30, 50]"
-          :page-size="listQuery.limit"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
+        <template #columns>
+          <a-table-column title="入库单号" data-index="order_no" :width="180">
+            <template #cell="{ record }">
+              <span class="order-no">{{ record.order_no }}</span>
+            </template>
+          </a-table-column>
+          <a-table-column title="类型" data-index="type" :width="120" align="center" />
+          <a-table-column title="供应商" data-index="supplier_name" :min-width="150" />
+          <a-table-column title="状态" align="center" :width="120">
+            <template #cell="{ record }">
+              <a-tag :color="getStatusColor(record.status)" bordered>
+                {{ getStatusLabel(record.status) }}
+              </a-tag>
+            </template>
+          </a-table-column>
+          <a-table-column title="操作" align="center" :width="220" fixed="right">
+            <template #cell="{ record }">
+              <a-space>
+                <a-button v-if="record.status === 2" type="text" size="small" @click="handleCheck(record)">
+                  <template #icon><icon-archive /></template>
+                  验收货物
+                </a-button>
+                <a-button v-if="record.status === 3" type="text" status="success" size="small" @click="handleShelve(record)">
+                  <template #icon><icon-send /></template>
+                  确认上架
+                </a-button>
+                <a-button type="text" size="small" @click="handleDetail(record)">
+                  <template #icon><icon-eye /></template>
+                  详情
+                </a-button>
+              </a-space>
+            </template>
+          </a-table-column>
+        </template>
+      </a-table>
+    </a-card>
 
     <!-- 验收弹窗 -->
-    <el-dialog title="货物验收" v-model="checkDialogVisible" width="800px">
-      <el-form :model="temp" label-width="100px">
-        <el-descriptions title="单据信息" :column="2" border>
-          <el-descriptions-item label="入库单号">{{ temp.order_no }}</el-descriptions-item>
-          <el-descriptions-item label="供应商">{{ temp.supplier_name }}</el-descriptions-item>
-        </el-descriptions>
+    <a-modal
+      :visible="checkDialogVisible"
+      title="货物验收"
+      @cancel="checkDialogVisible = false"
+      @before-ok="confirmCheck"
+      width="850px"
+    >
+      <div class="dialog-inner-content">
+        <a-descriptions title="单据信息" :column="2" border>
+          <a-descriptions-item label="入库单号">
+            <span class="info-text">{{ temp.order_no }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item label="供应商">
+            <span class="info-text">{{ temp.supplier_name }}</span>
+          </a-descriptions-item>
+        </a-descriptions>
         
-        <div style="margin-top: 20px;">
-          <div style="font-weight: bold; margin-bottom: 10px;">货品验收明细</div>
-          <el-table :data="temp.items" border style="width: 100%">
-            <el-table-column label="货品" prop="goods_name" min-width="150" />
-            <el-table-column label="SKU" prop="sku" width="120" align="center" />
-            <el-table-column label="计划数量" prop="planned_quantity" width="100" align="center" />
-            <el-table-column label="实收数量" width="150" align="center">
-              <template #default="scope">
-                <el-input-number v-model="scope.row.received_quantity" :min="0" :max="scope.row.planned_quantity" size="small" />
-              </template>
-            </el-table-column>
-          </el-table>
+        <div class="detail-section">
+          <div class="section-title">货品验收明细</div>
+          <a-table :data="temp.items" :pagination="false" :bordered="true">
+            <template #columns>
+              <a-table-column title="货品名称" data-index="goods_name" :min-width="150" />
+              <a-table-column title="SKU" data-index="sku" :width="120" align="center" />
+              <a-table-column title="计划数量" data-index="planned_quantity" :width="100" align="center">
+                <template #cell="{ record }">
+                  <span class="quantity-text">{{ record.planned_quantity }}</span>
+                </template>
+              </a-table-column>
+              <a-table-column title="实收数量" :width="150" align="center">
+                <template #cell="{ record }">
+                  <a-input-number v-model="record.received_quantity" :min="0" :max="record.planned_quantity" size="small" />
+                </template>
+              </a-table-column>
+            </template>
+          </a-table>
         </div>
-      </el-form>
-      <template #footer>
-        <el-button @click="checkDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmCheck">完成验收</el-button>
-      </template>
-    </el-dialog>
+      </div>
+    </a-modal>
 
     <!-- 上架弹窗 -->
-    <el-dialog title="货物上架" v-model="shelveDialogVisible" width="900px">
-      <el-form :model="temp" label-width="100px">
-        <el-descriptions title="单据信息" :column="2" border>
-          <el-descriptions-item label="入库单号">{{ temp.order_no }}</el-descriptions-item>
-          <el-descriptions-item label="供应商">{{ temp.supplier_name }}</el-descriptions-item>
-        </el-descriptions>
+    <a-modal
+      :visible="shelveDialogVisible"
+      title="货物上架"
+      @cancel="shelveDialogVisible = false"
+      @before-ok="confirmShelve"
+      width="950px"
+    >
+      <div class="dialog-inner-content">
+        <a-descriptions title="单据信息" :column="2" border>
+          <a-descriptions-item label="入库单号">
+            <span class="info-text">{{ temp.order_no }}</span>
+          </a-descriptions-item>
+          <a-descriptions-item label="供应商">
+            <span class="info-text">{{ temp.supplier_name }}</span>
+          </a-descriptions-item>
+        </a-descriptions>
         
-        <div style="margin-top: 20px;">
-          <div style="font-weight: bold; margin-bottom: 10px;">货品上架明细</div>
-          <el-table :data="temp.items" border style="width: 100%">
-            <el-table-column label="货品" prop="goods_name" min-width="150" />
-            <el-table-column label="SKU" prop="sku" width="120" align="center" />
-            <el-table-column label="实收数量" prop="received_quantity" width="100" align="center" />
-            <el-table-column label="上架库位" width="250" align="center">
-              <template #default="scope">
-                <el-select v-model="scope.row.location_id" placeholder="选择上架库位" @change="(val) => handleLocationChange(val, scope.$index)" style="width: 100%">
-                  <el-option v-for="loc in locationOptions" :key="loc._id" :label="loc.code" :value="loc._id" />
-                </el-select>
-              </template>
-            </el-table-column>
-          </el-table>
+        <div class="detail-section">
+          <div class="section-title">货品上架明细</div>
+          <a-table :data="temp.items" :pagination="false" :bordered="true">
+            <template #columns>
+              <a-table-column title="货品名称" data-index="goods_name" :min-width="150" />
+              <a-table-column title="SKU" data-index="sku" :width="120" align="center" />
+              <a-table-column title="实收数量" data-index="received_quantity" :width="100" align="center">
+                <template #cell="{ record }">
+                  <span class="quantity-text">{{ record.received_quantity }}</span>
+                </template>
+              </a-table-column>
+              <a-table-column title="上架库位" :width="220" align="center">
+                <template #cell="{ record, rowIndex }">
+                  <a-select 
+                    v-model="record.location_id" 
+                    placeholder="选择库位" 
+                    allow-search
+                    @change="(val) => handleLocationChange(val as string, rowIndex)" 
+                    style="width: 100%"
+                  >
+                    <a-option v-for="loc in locationOptions" :key="loc._id" :label="loc.code" :value="loc._id" />
+                  </a-select>
+                </template>
+              </a-table-column>
+            </template>
+          </a-table>
         </div>
-      </el-form>
-      <template #footer>
-        <el-button @click="shelveDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmShelve">完成上架</el-button>
-      </template>
-    </el-dialog>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { getInboundOrders, receiveInboundGoods, shelveInboundGoods, updateInboundOrder } from '@/api/inbound'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { getInboundOrderList, checkInboundGoods, shelveInboundGoods } from '@/api/inbound'
 import { getLocationList } from '@/api/basic'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { Message } from '@arco-design/web-vue'
 
 const list = ref([])
 const total = ref(0)
@@ -124,29 +185,37 @@ const listLoading = ref(true)
 const listQuery = reactive({
   page: 1,
   limit: 20,
-  order_no: undefined
+  order_no: undefined,
+  status: 2 // 默认查询待验收
 })
 
+const pagination = computed(() => ({
+  total: total.value,
+  current: listQuery.page,
+  pageSize: listQuery.limit,
+  showTotal: true,
+  showPageSize: true
+}))
+
+const locationOptions = ref<any[]>([])
 const checkDialogVisible = ref(false)
 const shelveDialogVisible = ref(false)
-const locationOptions = ref<any[]>([])
-const temp = reactive<any>({
+const temp = reactive({
   _id: undefined,
   order_no: '',
   supplier_name: '',
-  items: []
+  items: [] as any[]
 })
 
 const getList = async () => {
   listLoading.value = true
   try {
-    const response: any = await getInboundOrders({
+    const response: any = await getInboundOrderList({
       ...listQuery,
       skip: (listQuery.page - 1) * listQuery.limit
     })
-    // 过滤掉待审核(1)和已完成(4)的单据
-    list.value = response.filter((o: any) => o.status === 2 || o.status === 3)
-    total.value = list.value.length
+    list.value = response
+    total.value = response.length
   } catch (error) {
     console.error(error)
   } finally {
@@ -155,8 +224,12 @@ const getList = async () => {
 }
 
 const loadLocations = async () => {
-  const response: any = await getLocationList({ limit: 1000 })
-  locationOptions.value = response
+  try {
+    const response: any = await getLocationList({ limit: 1000 })
+    locationOptions.value = response
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 const handleFilter = () => {
@@ -166,27 +239,48 @@ const handleFilter = () => {
 
 const resetQuery = () => {
   listQuery.order_no = undefined
+  listQuery.status = 2
   handleFilter()
 }
 
-const handleSizeChange = (val: number) => {
-  listQuery.limit = val
+const handleSizeChange = (pageSize: number) => {
+  listQuery.limit = pageSize
   getList()
 }
 
-const handleCurrentChange = (val: number) => {
-  listQuery.page = val
+const handleCurrentChange = (current: number) => {
+  listQuery.page = current
   getList()
 }
 
 const handleCheck = (row: any) => {
   Object.assign(temp, JSON.parse(JSON.stringify(row)))
+  // 初始化实收数量
+  temp.items.forEach((item: any) => {
+    if (!item.received_quantity) {
+      item.received_quantity = item.planned_quantity
+    }
+  })
   checkDialogVisible.value = true
+}
+
+const confirmCheck = async () => {
+  try {
+    await checkInboundGoods(temp._id, { items: temp.items })
+    Message.success('验收完成')
+    checkDialogVisible.value = false
+    getList()
+    return true
+  } catch (error) {
+    console.error(error)
+    return false
+  }
 }
 
 const handleShelve = (row: any) => {
   Object.assign(temp, JSON.parse(JSON.stringify(row)))
   shelveDialogVisible.value = true
+  loadLocations()
 }
 
 const handleLocationChange = (val: string, index: number) => {
@@ -196,62 +290,111 @@ const handleLocationChange = (val: string, index: number) => {
   }
 }
 
-const confirmCheck = async () => {
-  try {
-    await receiveInboundGoods(temp._id, temp.items)
-    ElMessage.success('验收完成')
-    checkDialogVisible.value = false
-    getList()
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 const confirmShelve = async () => {
-  // Check if all items have location assigned
-  const missingLocation = temp.items.some((i: any) => !i.location_id)
-  if (missingLocation) {
-    ElMessage.warning('请为所有货品分配上架库位')
-    return
+  const hasNoLocation = temp.items.some((item: any) => !item.location_id)
+  if (hasNoLocation) {
+    Message.warning('请为所有货品选择上架库位')
+    return false
   }
-  
+
   try {
-    // First update the order items with location IDs and codes
-    await updateInboundOrder(temp._id, { items: temp.items })
-    // Then call shelve
-    await shelveInboundGoods(temp._id)
-    ElMessage.success('上架完成，库存已更新')
+    await shelveInboundGoods(temp._id, { items: temp.items })
+    Message.success('上架完成')
     shelveDialogVisible.value = false
     getList()
+    return true
   } catch (error) {
     console.error(error)
+    return false
   }
 }
 
-const getStatusType = (status: number) => {
+const handleDetail = (row: any) => {
+  Message.info('详情查看功能开发中...')
+}
+
+const handleExport = () => {
+  Message.info('导出功能开发中...')
+}
+
+const handlePrint = () => {
+  Message.info('打印功能开发中...')
+}
+
+const getStatusColor = (status: number) => {
   const map: any = {
-    2: 'primary',
-    3: 'info'
+    1: 'orange',
+    2: 'arcoblue',
+    3: 'cyan',
+    4: 'green',
+    0: 'gray'
   }
-  return map[status] || 'info'
+  return map[status] || 'gray'
 }
 
 const getStatusLabel = (status: number) => {
   const map: any = {
+    1: '待审核',
     2: '待验收',
-    3: '待上架'
+    3: '待上架',
+    4: '已完成',
+    0: '已取消'
   }
   return map[status] || '未知'
 }
 
 onMounted(() => {
   getList()
-  loadLocations()
 })
 </script>
 
 <style scoped lang="scss">
-.filter-container {
+.header-section {
+  margin-bottom: 24px;
+  .page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1d2129;
+    margin: 0;
+  }
+}
+
+.action-card {
   margin-bottom: 16px;
+}
+
+.filter-card {
+  margin-bottom: 16px;
+}
+
+.table-card {
+  background-color: #fff;
+}
+
+.order-no {
+  color: #165dff;
+  font-weight: 500;
+}
+
+.info-text {
+  color: #1d2129;
+  font-weight: 500;
+}
+
+.detail-section {
+  margin-top: 24px;
+  .section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1d2129;
+    margin-bottom: 16px;
+    padding-left: 8px;
+    border-left: 4px solid #165dff;
+  }
+}
+
+.quantity-text {
+  font-weight: bold;
+  color: #165dff;
 }
 </style>

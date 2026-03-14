@@ -1,102 +1,128 @@
 <template>
   <div class="app-container">
-    <el-card class="filter-container" shadow="never">
-      <el-form :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-form-item label="供应商名称">
-          <el-input v-model="listQuery.name" placeholder="请输入供应商名称" clearable @keyup.enter="handleFilter" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleFilter">查询</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <div class="header-section">
+      <h1 class="page-title">供应商管理</h1>
+    </div>
 
-    <el-card class="table-container" shadow="never">
-      <template #header>
-        <div class="card-header">
-          <el-button type="primary" icon="Plus" @click="handleAdd">新增供应商</el-button>
-        </div>
-      </template>
+    <a-card class="action-card" :bordered="false">
+      <a-space>
+        <a-button type="primary" @click="handleAdd">
+          <template #icon><icon-plus /></template>
+          新增供应商
+        </a-button>
+        <a-button @click="handleExport">
+          <template #icon><icon-download /></template>
+          导出
+        </a-button>
+      </a-space>
+    </a-card>
 
-      <el-table
-        v-loading="listLoading"
+    <a-card class="filter-card" :bordered="false">
+      <a-form :model="listQuery" layout="inline" @submit="handleFilter">
+        <a-form-item label="供应商名称">
+          <a-input v-model="listQuery.name" placeholder="输入供应商名称" allow-clear />
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleFilter">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button @click="resetQuery">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </a-card>
+
+    <a-card class="table-card" :bordered="false">
+      <a-table
+        :loading="listLoading"
         :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%;"
+        :pagination="pagination"
+        row-key="_id"
+        @page-change="handleCurrentChange"
+        @page-size-change="handleSizeChange"
       >
-        <el-table-column label="供应商名称" prop="name" align="center" />
-        <el-table-column label="联系人" prop="contact_person" align="center" />
-        <el-table-column label="联系电话" prop="phone" align="center" />
-        <el-table-column label="邮箱" prop="email" align="center" />
-        <el-table-column label="地址" prop="address" align="center" show-overflow-tooltip />
-        <el-table-column label="状态" align="center">
-          <template #default="scope">
-            <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
-              {{ scope.row.status === 1 ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="200">
-          <template #default="scope">
-            <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-container">
-        <el-pagination
-          :current-page="listQuery.page"
-          :page-sizes="[10, 20, 30, 50]"
-          :page-size="listQuery.limit"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
+        <template #columns>
+          <a-table-column title="供应商名称" :min-width="200">
+            <template #cell="{ record }">
+              <div class="supplier-name-cell">
+                <div class="supplier-icon">{{ record.name.charAt(0) }}</div>
+                <span>{{ record.name }}</span>
+              </div>
+            </template>
+          </a-table-column>
+          <a-table-column title="联系人" data-index="contact_person" :width="120" />
+          <a-table-column title="联系电话" data-index="phone" :width="150" />
+          <a-table-column title="邮箱" data-index="email" :width="180" />
+          <a-table-column title="地址" data-index="address" :min-width="200" ellipsis tooltip />
+          <a-table-column title="状态" align="center" :width="100">
+            <template #cell="{ record }">
+              <a-tag :color="record.status === 1 ? 'green' : 'red'" bordered>
+                {{ record.status === 1 ? '启用' : '禁用' }}
+              </a-tag>
+            </template>
+          </a-table-column>
+          <a-table-column title="操作" align="center" :width="180">
+            <template #cell="{ record }">
+              <a-space>
+                <a-button type="text" size="small" @click="handleEdit(record)">
+                  <template #icon><icon-edit /></template>
+                  编辑
+                </a-button>
+                <a-button type="text" status="danger" size="small" @click="handleDelete(record)">
+                  <template #icon><icon-delete /></template>
+                  删除
+                </a-button>
+              </a-space>
+            </template>
+          </a-table-column>
+        </template>
+      </a-table>
+    </a-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form ref="dataFormRef" :model="temp" :rules="rules" label-width="100px" style="width: 400px;">
-        <el-form-item label="供应商名称" prop="name">
-          <el-input v-model="temp.name" placeholder="请输入供应商名称" />
-        </el-form-item>
-        <el-form-item label="联系人" prop="contact_person">
-          <el-input v-model="temp.contact_person" placeholder="请输入联系人" />
-        </el-form-item>
-        <el-form-item label="联系电话" prop="phone">
-          <el-input v-model="temp.phone" placeholder="请输入联系电话" />
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="temp.email" placeholder="请输入邮箱" />
-        </el-form-item>
-        <el-form-item label="地址" prop="address">
-          <el-input v-model="temp.address" type="textarea" placeholder="请输入地址" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="temp.status">
-            <el-radio :label="1">启用</el-radio>
-            <el-radio :label="0">禁用</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmData">确认</el-button>
-      </template>
-    </el-dialog>
+    <a-modal
+      :visible="dialogVisible"
+      :title="dialogTitle"
+      @cancel="dialogVisible = false"
+      @before-ok="confirmData"
+      width="550px"
+    >
+      <a-form ref="dataFormRef" :model="temp" :rules="rules" auto-label-width>
+        <a-form-item label="供应商名称" field="name">
+          <a-input v-model="temp.name" placeholder="请输入供应商名称" />
+        </a-form-item>
+        <a-form-item label="联系人" field="contact_person">
+          <a-input v-model="temp.contact_person" placeholder="请输入联系人" />
+        </a-form-item>
+        <a-form-item label="联系电话" field="phone">
+          <a-input v-model="temp.phone" placeholder="请输入联系电话" />
+        </a-form-item>
+        <a-form-item label="邮箱" field="email">
+          <a-input v-model="temp.email" placeholder="请输入邮箱" />
+        </a-form-item>
+        <a-form-item label="地址" field="address">
+          <a-textarea v-model="temp.address" :rows="3" placeholder="请输入地址" />
+        </a-form-item>
+        <a-form-item label="状态" field="status">
+          <a-radio-group v-model="temp.status">
+            <a-radio :value="1">启用</a-radio>
+            <a-radio :value="0">禁用</a-radio>
+          </a-radio-group>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { getSupplierList, createSupplier, updateSupplier, deleteSupplier } from '@/api/basic'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { Message, Modal } from '@arco-design/web-vue'
 
 const list = ref([])
 const total = ref(0)
@@ -106,6 +132,14 @@ const listQuery = reactive({
   limit: 20,
   name: undefined
 })
+
+const pagination = computed(() => ({
+  total: total.value,
+  current: listQuery.page,
+  pageSize: listQuery.limit,
+  showTotal: true,
+  showPageSize: true
+}))
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
@@ -121,9 +155,9 @@ const temp = reactive({
 })
 
 const rules = {
-  name: [{ required: true, message: '供应商名称是必填项', trigger: 'blur' }],
-  contact_person: [{ required: true, message: '联系人是必填项', trigger: 'blur' }],
-  phone: [{ required: true, message: '联系电话是必填项', trigger: 'blur' }]
+  name: [{ required: true, message: '供应商名称是必填项' }],
+  contact_person: [{ required: true, message: '联系人是必填项' }],
+  phone: [{ required: true, message: '联系电话是必填项' }]
 }
 
 const getList = async () => {
@@ -152,13 +186,13 @@ const resetQuery = () => {
   handleFilter()
 }
 
-const handleSizeChange = (val: number) => {
-  listQuery.limit = val
+const handleSizeChange = (pageSize: number) => {
+  listQuery.limit = pageSize
   getList()
 }
 
-const handleCurrentChange = (val: number) => {
-  listQuery.page = val
+const handleCurrentChange = (current: number) => {
+  listQuery.page = current
   getList()
 }
 
@@ -187,17 +221,35 @@ const handleEdit = (row: any) => {
 }
 
 const confirmData = async () => {
-  await dataFormRef.value.validate(async (valid: boolean) => {
-    if (valid) {
+  const errors = await dataFormRef.value?.validate()
+  if (!errors) {
+    try {
+      if (temp._id) {
+        await updateSupplier(temp._id, temp)
+        Message.success('更新成功')
+      } else {
+        await createSupplier(temp)
+        Message.success('创建成功')
+      }
+      dialogVisible.value = false
+      getList()
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  }
+  return false
+}
+
+const handleDelete = (row: any) => {
+  Modal.confirm({
+    title: '提示',
+    content: '确定要删除该供应商吗？',
+    onOk: async () => {
       try {
-        if (temp._id) {
-          await updateSupplier(temp._id, temp)
-          ElMessage.success('更新成功')
-        } else {
-          await createSupplier(temp)
-          ElMessage.success('创建成功')
-        }
-        dialogVisible.value = false
+        await deleteSupplier(row._id)
+        Message.success('删除成功')
         getList()
       } catch (error) {
         console.error(error)
@@ -206,16 +258,8 @@ const confirmData = async () => {
   })
 }
 
-const handleDelete = (row: any) => {
-  ElMessageBox.confirm('确认删除该供应商吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-    await deleteSupplier(row._id)
-    ElMessage.success('删除成功')
-    getList()
-  })
+const handleExport = () => {
+  Message.info('功能开发中...')
 }
 
 onMounted(() => {
@@ -224,12 +268,43 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.filter-container {
+.header-section {
+  margin-bottom: 24px;
+  .page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1d2129;
+    margin: 0;
+  }
+}
+
+.action-card {
   margin-bottom: 16px;
 }
-.card-header {
+
+.filter-card {
+  margin-bottom: 16px;
+}
+
+.table-card {
+  background-color: #fff;
+}
+
+.supplier-name-cell {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  .supplier-icon {
+    width: 32px;
+    height: 32px;
+    background-color: #e8f3ff;
+    color: #165dff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+  }
 }
 </style>

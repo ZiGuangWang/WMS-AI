@@ -1,125 +1,150 @@
 <template>
   <div class="dashboard-container">
+    <div class="welcome-section">
+      <h1 class="page-title">工作台</h1>
+      <p class="subtitle">欢迎回到仓储管理系统，这是您的工作中心</p>
+    </div>
+
     <!-- 数据概览 -->
-    <el-row :gutter="20">
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card primary">
-          <div class="stat-content">
-            <div class="stat-info">
-              <div class="stat-label">今日入库单</div>
-              <div class="stat-value">{{ stats.today_inbound }}</div>
-            </div>
-            <div class="stat-icon">
-              <el-icon size="40"><Download /></el-icon>
+    <a-row :gutter="24" class="stat-row">
+      <a-col :span="6">
+        <a-card :bordered="false" class="stat-card">
+          <div class="stat-header">
+            <span class="label">今日入库单</span>
+            <div class="icon-wrapper blue">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                <path d="M7.43433 15.8921L24 25.4621L40.5657 15.8921V32.1079L24 41.6779L7.43433 32.1079V15.8921Z" />
+                <path d="M24 25.4621V41.6779" />
+                <path d="M7.43433 15.8921L24 6.32214L40.5657 15.8921L24 25.4621L7.43433 15.8921Z" />
+              </svg>
             </div>
           </div>
+          <div class="stat-value">{{ stats.today_inbound }}</div>
           <div class="stat-footer">
-            <span class="trend">较昨日 <el-icon><CaretTop /></el-icon> 2</span>
+            <span class="trend up"><icon-caret-up /> +12%</span>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card success">
-          <div class="stat-content">
-            <div class="stat-info">
-              <div class="stat-label">今日出库单</div>
-              <div class="stat-value">{{ stats.today_outbound }}</div>
-            </div>
-            <div class="stat-icon">
-              <el-icon size="40"><Upload /></el-icon>
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card :bordered="false" class="stat-card">
+          <div class="stat-header">
+            <span class="label">今日出库单</span>
+            <div class="icon-wrapper blue">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                <path d="M7.43433 15.8921L24 25.4621L40.5657 15.8921V32.1079L24 41.6779L7.43433 32.1079V15.8921Z" />
+                <path d="M24 25.4621V41.6779" />
+                <path d="M7.43433 15.8921L24 6.32214L40.5657 15.8921L24 25.4621L7.43433 15.8921Z" />
+              </svg>
             </div>
           </div>
+          <div class="stat-value">{{ stats.today_outbound }}</div>
           <div class="stat-footer">
-            <span class="trend">较昨日 <el-icon><CaretBottom /></el-icon> 1</span>
+            <span class="trend down"><icon-caret-down /> -8%</span>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card info">
-          <div class="stat-content">
-            <div class="stat-info">
-              <div class="stat-label">库存总量</div>
-              <div class="stat-value">{{ stats.inventory_total }}</div>
-            </div>
-            <div class="stat-icon">
-              <el-icon size="40"><Box /></el-icon>
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card :bordered="false" class="stat-card">
+          <div class="stat-header">
+            <span class="label">当前库存总量</span>
+            <div class="icon-wrapper blue">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                <path d="M7.43433 15.8921L24 25.4621L40.5657 15.8921V32.1079L24 41.6779L7.43433 32.1079V15.8921Z" />
+                <path d="M24 25.4621V41.6779" />
+                <path d="M7.43433 15.8921L24 6.32214L40.5657 15.8921L24 25.4621L7.43433 15.8921Z" />
+              </svg>
             </div>
           </div>
+          <div class="stat-value">{{ stats.inventory_total }}</div>
           <div class="stat-footer">
-            <span>实时数据更新</span>
+            <span class="trend neutral">稳定</span>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card danger">
-          <div class="stat-content">
-            <div class="stat-info">
-              <div class="stat-label">库存预警</div>
-              <div class="stat-value">{{ stats.warning_count }}</div>
-            </div>
-            <div class="stat-icon">
-              <el-icon size="40"><Warning /></el-icon>
-            </div>
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card :bordered="false" class="stat-card warning">
+          <div class="stat-header">
+            <span class="label">库存预警数量</span>
+            <div class="icon-wrapper orange"><icon-exclamation-circle-fill /></div>
           </div>
+          <div class="stat-value">{{ stats.warning_count }}</div>
           <div class="stat-footer">
-            <span>需要及时处理</span>
+            <span class="trend up"><icon-caret-up /> +12%</span>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </a-card>
+      </a-col>
+    </a-row>
 
     <!-- 快捷操作 -->
-    <el-row :gutter="20" class="mt-20">
-      <el-col :span="24">
-        <el-card shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span>快捷操作</span>
-            </div>
-          </template>
-          <div class="quick-actions">
-            <el-button type="primary" size="large" icon="Plus" @click="router.push('/inbound/order')">创建入库单</el-button>
-            <el-button type="success" size="large" icon="Minus" @click="router.push('/outbound/order')">创建出库单</el-button>
-            <el-button type="warning" size="large" icon="Search" @click="router.push('/inventory/query')">库存查询</el-button>
-            <el-button type="danger" size="large" icon="Warning" @click="router.push('/inventory/warning')">预警处理</el-button>
+    <div class="section-container">
+      <h2 class="section-title">快捷操作</h2>
+      <a-row :gutter="20">
+        <a-col :span="6">
+          <div class="quick-btn blue" @click="router.push('/inbound/order')">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; margin-bottom: 8px;">
+              <path d="M24 44L7.43433 34.4378V15.3444L24 5.78223L40.5657 15.3444V34.4378L24 44Z" />
+              <path d="M24 24.8911V44" />
+              <path d="M7.43433 15.3444L24 24.8911L40.5657 15.3444" />
+              <path d="M24 5.78223L7.43433 15.3444" />
+              <path d="M40.5657 15.3444L24 5.78223" />
+              <path d="M16 28L24 23L32 28" stroke-width="4" />
+            </svg>
+            <span>创建入库单</span>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </a-col>
+        <a-col :span="6">
+          <div class="quick-btn green" @click="router.push('/outbound/order')">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; margin-bottom: 8px;">
+              <path d="M24 44L7.43433 34.4378V15.3444L24 5.78223L40.5657 15.3444V34.4378L24 44Z" />
+              <path d="M24 24.8911V44" />
+              <path d="M7.43433 15.3444L24 24.8911L40.5657 15.3444" />
+              <path d="M24 5.78223L7.43433 15.3444" />
+              <path d="M40.5657 15.3444L24 5.78223" />
+              <path d="M32 23L24 28L16 23" stroke-width="4" />
+            </svg>
+            <span>创建出库单</span>
+          </div>
+        </a-col>
+        <a-col :span="6">
+          <div class="quick-btn purple" @click="router.push('/inventory/query')">
+            <icon-search :size="24" />
+            <span>库存查询</span>
+          </div>
+        </a-col>
+        <a-col :span="6">
+          <div class="quick-btn orange" @click="handleImport">
+            <icon-upload :size="24" />
+            <span>货品导入</span>
+          </div>
+        </a-col>
+      </a-row>
+    </div>
 
-    <!-- 库存预警列表 -->
-    <el-row :gutter="20" class="mt-20">
-      <el-col :span="24">
-        <el-card shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span>库存预警提示</span>
-              <el-button link type="primary">更多</el-button>
-            </div>
-          </template>
-          <el-table :data="warningList" style="width: 100%">
-            <el-table-column prop="goods_name" label="货品名称" />
-            <el-table-column prop="sku" label="规格型号" />
-            <el-table-column prop="current_stock" label="当前库存">
-              <template #default="scope">
-                <span class="text-danger">{{ scope.row.current_stock }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="min_stock" label="安全库存" />
-            <el-table-column label="状态">
-              <template #default="scope">
-                <el-tag type="danger" size="small">{{ scope.row.status }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="120">
-              <template #default>
-                <el-button link type="primary" @click="router.push('/inbound/order')">去补货</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-      </el-col>
-    </el-row>
+    <!-- 库存预警 -->
+    <div class="section-container warning-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <icon-exclamation-circle style="color: #ff7d00; margin-right: 8px" />
+          库存预警
+        </h2>
+        <a-button type="text" @click="router.push('/inventory/warning')">
+          查看全部 <icon-right />
+        </a-button>
+      </div>
+      
+      <div class="warning-list">
+        <div v-for="(item, index) in warningList" :key="index" class="warning-item">
+          <div class="warning-info">
+            <div class="name">{{ item.goods_name }}</div>
+            <div class="detail">库存不足：当前 {{ item.current_stock }} 件，安全库存 {{ item.min_stock }} 件</div>
+          </div>
+          <a-button type="text" @click="router.push('/inventory/adjust')">
+            <template #icon><icon-edit /></template>
+            调整
+          </a-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -128,6 +153,7 @@ import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { getStats } from '@/api/dashboard'
 import { getInventoryWarning } from '@/api/inventory'
+import { Message } from '@arco-design/web-vue'
 
 const router = useRouter()
 
@@ -146,10 +172,14 @@ const loadData = async () => {
     Object.assign(stats, statsRes)
     
     const warningRes: any = await getInventoryWarning()
-    warningList.value = warningRes.slice(0, 5) // Just show top 5
+    warningList.value = warningRes.slice(0, 2) // Show only 2
   } catch (error) {
     console.error(error)
   }
+}
+
+const handleImport = () => {
+  Message.info('货品导入功能开发中...')
 }
 
 onMounted(() => {
@@ -159,88 +189,173 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .dashboard-container {
-  padding: 0;
+  padding: 8px;
+}
+
+.welcome-section {
+  margin-bottom: 32px;
+  .page-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1d2129;
+    margin: 0 0 8px 0;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #86909c;
+    margin: 0;
+  }
+}
+
+.stat-row {
+  margin-bottom: 32px;
 }
 
 .stat-card {
-  border: none;
   border-radius: 8px;
+  background-color: #ffffff;
+  transition: all 0.3s;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
   
-  .stat-content {
+  :deep(.arco-card-body) {
+    padding: 24px;
+  }
+
+  .stat-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .stat-label {
-    font-size: 14px;
-    color: #909399;
-    margin-bottom: 8px;
-  }
-  
-  .stat-value {
-    font-size: 28px;
-    font-weight: bold;
-    color: #303133;
-  }
-  
-  .stat-icon {
-    opacity: 0.8;
-  }
-  
-  .stat-footer {
-    border-top: 1px solid #f0f2f5;
-    padding-top: 10px;
-    font-size: 13px;
-    color: #606266;
-    
-    .trend {
-      display: inline-flex;
+    margin-bottom: 16px;
+    .label {
+      font-size: 14px;
+      color: #4e5969;
+    }
+    .icon-wrapper {
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      display: flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      border-radius: 6px;
+      &.blue {
+        background-color: #e8f3ff;
+        color: #165dff;
+      }
+      &.orange {
+        background-color: #fff7e8;
+        color: #ff7d00;
+      }
     }
   }
   
-  &.primary {
-    background: linear-gradient(135deg, #e6f7ff 0%, #ffffff 100%);
-    .stat-icon { color: #1890ff; }
-    .trend { color: #52c41a; }
+  .stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #1d2129;
+    margin-bottom: 8px;
   }
-  &.success {
-    background: linear-gradient(135deg, #f6ffed 0%, #ffffff 100%);
-    .stat-icon { color: #52c41a; }
-    .trend { color: #f5222d; }
+  
+  .stat-footer {
+    .trend {
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+      &.up { color: #00b42a; }
+      &.down { color: #f53f3f; }
+      &.neutral { color: #86909c; }
+    }
   }
-  &.info {
-    background: linear-gradient(135deg, #f9f0ff 0%, #ffffff 100%);
-    .stat-icon { color: #722ed1; }
-  }
-  &.danger {
-    background: linear-gradient(135deg, #fff1f0 0%, #ffffff 100%);
-    .stat-icon { color: #f5222d; }
-    .stat-value { color: #f5222d; }
+  
+  &.warning {
+    border: 1px solid #ff7d00;
   }
 }
 
-.mt-20 {
-  margin-top: 20px;
+.section-container {
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border: 1px solid #f2f3f5;
+  
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+    color: #1d2129;
+    display: flex;
+    align-items: center;
+  }
 }
 
-.card-header {
+.quick-btn {
+  height: 100px;
+  border-radius: 8px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+  }
+
+  &.blue { background: linear-gradient(135deg, #165dff 0%, #4e89ff 100%); }
+  &.green { background: linear-gradient(135deg, #00b42a 0%, #34d399 100%); }
+  &.purple { background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%); }
+  &.orange { background: linear-gradient(135deg, #ff7d00 0%, #ffb649 100%); }
+  
+  span {
+    font-size: 14px;
+    font-weight: 500;
+  }
 }
 
-.quick-actions {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+.warning-section {
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    .section-title {
+      margin-bottom: 0;
+    }
+  }
 }
 
-.text-danger {
-  color: #f56c6c;
-  font-weight: bold;
+.warning-list {
+  .warning-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-radius: 6px;
+    background-color: #fffaf5;
+    margin-bottom: 12px;
+    border: 1px solid #ffe4ba;
+    
+    .warning-info {
+      .name {
+        font-weight: 600;
+        color: #1d2129;
+        margin-bottom: 4px;
+      }
+      .detail {
+        font-size: 13px;
+        color: #4e5969;
+      }
+    }
+  }
 }
 </style>

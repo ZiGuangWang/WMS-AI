@@ -1,109 +1,131 @@
 <template>
   <div class="app-container">
-    <el-card class="filter-container" shadow="never">
-      <template #header>
-        <div class="card-header">
-          <span>库存调整</span>
-          <el-button type="primary" icon="Plus" @click="handleAdd">新增调整单</el-button>
-        </div>
-      </template>
-      
-      <el-form :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-form-item label="操作类型">
-          <el-select v-model="listQuery.type" placeholder="请选择类型" clearable>
-            <el-option label="入库" value="入库" />
-            <el-option label="出库" value="出库" />
-            <el-option label="调整" value="调整" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleFilter">查询</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <div class="header-section">
+      <h1 class="page-title">库存调整</h1>
+    </div>
 
-    <el-card class="table-container" shadow="never">
-      <template #header>
-        <span>变动记录</span>
-      </template>
+    <a-card class="action-card" :bordered="false">
+      <a-space>
+        <a-button type="primary" @click="handleAdd">
+          <template #icon><icon-plus /></template>
+          新增调整单
+        </a-button>
+        <a-button @click="handleExport">
+          <template #icon><icon-download /></template>
+          导出调整记录
+        </a-button>
+      </a-space>
+    </a-card>
 
-      <el-table
-        v-loading="listLoading"
+    <a-card class="filter-card" :bordered="false">
+      <a-form :model="listQuery" layout="inline" @submit="handleFilter">
+        <a-form-item label="操作类型">
+          <a-select v-model="listQuery.type" placeholder="全部类型" allow-clear style="width: 150px">
+            <a-option label="入库" value="入库" />
+            <a-option label="出库" value="出库" />
+            <a-option label="调整" value="调整" />
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleFilter">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button @click="resetQuery">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </a-card>
+
+    <a-card class="table-card" :bordered="false">
+      <a-table
+        :loading="listLoading"
         :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%;"
+        :pagination="pagination"
+        row-key="_id"
+        @page-change="handleCurrentChange"
+        @page-size-change="handleSizeChange"
       >
-        <el-table-column label="货品名称" prop="goods_name" align="center" />
-        <el-table-column label="SKU编码" prop="sku" align="center" />
-        <el-table-column label="单据号" prop="order_no" align="center" width="180" />
-        <el-table-column label="类型" prop="type" align="center" width="100" />
-        <el-table-column label="库位" prop="location_code" align="center" width="120" />
-        <el-table-column label="变动数量" align="center" width="100">
-          <template #default="scope">
-            <span :class="scope.row.change_quantity > 0 ? 'text-success' : 'text-danger'">
-              {{ scope.row.change_quantity > 0 ? '+' : '' }}{{ scope.row.change_quantity }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column label="变动后数量" prop="after_quantity" align="center" width="100" />
-        <el-table-column label="操作人" prop="operator" align="center" width="100" />
-        <el-table-column label="操作时间" prop="created_at" align="center">
-          <template #default="scope">
-            {{ formatTime(scope.row.created_at) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="备注" prop="remark" align="center" show-overflow-tooltip />
-      </el-table>
-
-      <div class="pagination-container">
-        <el-pagination
-          :current-page="listQuery.page"
-          :page-sizes="[10, 20, 30, 50]"
-          :page-size="listQuery.limit"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
+        <template #columns>
+          <a-table-column title="货品信息" :min-width="200">
+            <template #cell="{ record }">
+              <div class="goods-info-cell">
+                <div class="goods-icon">{{ record.goods_name.charAt(0) }}</div>
+                <div class="goods-detail">
+                  <div class="name">{{ record.goods_name }}</div>
+                  <div class="sku">{{ record.sku }}</div>
+                </div>
+              </div>
+            </template>
+          </a-table-column>
+          <a-table-column title="单据号" data-index="order_no" :width="180" align="center">
+            <template #cell="{ record }">
+              <span class="order-no">{{ record.order_no }}</span>
+            </template>
+          </a-table-column>
+          <a-table-column title="类型" :width="100" align="center">
+            <template #cell="{ record }">
+              <a-tag :color="getTypeTagColor(record.type)" bordered>{{ record.type }}</a-tag>
+            </template>
+          </a-table-column>
+          <a-table-column title="库位" data-index="location_code" :width="120" align="center" />
+          <a-table-column title="变动数量" :width="120" align="center">
+            <template #cell="{ record }">
+              <span :class="['change-quantity', record.change_quantity > 0 ? 'text-success' : 'text-danger']">
+                {{ record.change_quantity > 0 ? '+' : '' }}{{ record.change_quantity }}
+              </span>
+            </template>
+          </a-table-column>
+          <a-table-column title="余量" data-index="after_quantity" :width="100" align="center" />
+          <a-table-column title="时间" :width="180" align="center">
+            <template #cell="{ record }">
+              {{ formatTime(record.created_at) }}
+            </template>
+          </a-table-column>
+          <a-table-column title="备注" data-index="remark" :min-width="150" ellipsis tooltip />
+        </template>
+      </a-table>
+    </a-card>
 
     <!-- 调整弹窗 -->
-    <el-dialog title="新增库存调整" v-model="dialogVisible" width="500px">
-      <el-form ref="dataFormRef" :model="temp" :rules="rules" label-width="100px">
-        <el-form-item label="货品" prop="goods_id">
-          <el-select v-model="temp.goods_id" placeholder="请选择货品" style="width: 100%">
-            <el-option v-for="item in goodsOptions" :key="item._id" :label="`${item.name} (${item.sku})`" :value="item._id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="库位" prop="location_id">
-          <el-select v-model="temp.location_id" placeholder="请选择库位" style="width: 100%">
-            <el-option v-for="loc in locationOptions" :key="loc._id" :label="loc.code" :value="loc._id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="调整数量" prop="adjust_quantity">
-          <el-input-number v-model="temp.adjust_quantity" placeholder="正数为增，负数为减" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="调整原因" prop="remark">
-          <el-input v-model="temp.remark" type="textarea" placeholder="请输入调整原因" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmAdjust">确认调整</el-button>
-      </template>
-    </el-dialog>
+    <a-modal
+      :visible="dialogVisible"
+      title="新增库存调整"
+      @cancel="dialogVisible = false"
+      @before-ok="confirmAdjust"
+      width="550px"
+    >
+      <a-form ref="dataFormRef" :model="temp" :rules="rules" auto-label-width>
+        <a-form-item label="货品" field="goods_id">
+          <a-select v-model="temp.goods_id" allow-search placeholder="选择货品" style="width: 100%">
+            <a-option v-for="item in goodsOptions" :key="item._id" :label="`${item.name} (${item.sku})`" :value="item._id" />
+          </a-select>
+        </a-form-item>
+        <a-form-item label="库位" field="location_id">
+          <a-select v-model="temp.location_id" allow-search placeholder="选择库位" style="width: 100%">
+            <a-option v-for="loc in locationOptions" :key="loc._id" :label="loc.code" :value="loc._id" />
+          </a-select>
+        </a-form-item>
+        <a-form-item label="调整数量" field="adjust_quantity">
+          <a-input-number v-model="temp.adjust_quantity" placeholder="正数为增，负数为减" style="width: 100%" />
+        </a-form-item>
+        <a-form-item label="原因/备注" field="remark">
+          <a-textarea v-model="temp.remark" :rows="3" placeholder="请输入调整原因" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { getInventoryLogs, adjustInventory } from '@/api/inventory'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { getInventoryHistory, adjustInventory } from '@/api/inventory'
 import { getGoodsList, getLocationList } from '@/api/basic'
-import { ElMessage } from 'element-plus'
+import { Message } from '@arco-design/web-vue'
 
 const list = ref([])
 const total = ref(0)
@@ -114,6 +136,16 @@ const listQuery = reactive({
   type: undefined
 })
 
+const pagination = computed(() => ({
+  total: total.value,
+  current: listQuery.page,
+  pageSize: listQuery.limit,
+  showTotal: true,
+  showPageSize: true
+}))
+
+const goodsOptions = ref<any[]>([])
+const locationOptions = ref<any[]>([])
 const dialogVisible = ref(false)
 const dataFormRef = ref()
 const temp = reactive({
@@ -123,19 +155,16 @@ const temp = reactive({
   remark: ''
 })
 
-const goodsOptions = ref<any[]>([])
-const locationOptions = ref<any[]>([])
-
 const rules = {
-  goods_id: [{ required: true, message: '请选择货品', trigger: 'change' }],
-  location_id: [{ required: true, message: '请选择库位', trigger: 'change' }],
-  adjust_quantity: [{ required: true, message: '请输入调整数量', trigger: 'blur' }]
+  goods_id: [{ required: true, message: '请选择货品' }],
+  location_id: [{ required: true, message: '请选择库位' }],
+  adjust_quantity: [{ required: true, message: '请输入调整数量' }]
 }
 
 const getList = async () => {
   listLoading.value = true
   try {
-    const response: any = await getInventoryLogs({
+    const response: any = await getInventoryHistory({
       ...listQuery,
       skip: (listQuery.page - 1) * listQuery.limit
     })
@@ -149,12 +178,16 @@ const getList = async () => {
 }
 
 const loadOptions = async () => {
-  const [goodsRes, locationRes]: any = await Promise.all([
-    getGoodsList({ limit: 1000 }),
-    getLocationList({ limit: 1000 })
-  ])
-  goodsOptions.value = goodsRes
-  locationOptions.value = locationRes
+  try {
+    const [goods, locations]: any = await Promise.all([
+      getGoodsList({ limit: 1000 }),
+      getLocationList({ limit: 1000 })
+    ])
+    goodsOptions.value = goods
+    locationOptions.value = locations
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 const handleFilter = () => {
@@ -167,46 +200,56 @@ const resetQuery = () => {
   handleFilter()
 }
 
-const handleSizeChange = (val: number) => {
-  listQuery.limit = val
+const handleSizeChange = (pageSize: number) => {
+  listQuery.limit = pageSize
   getList()
 }
 
-const handleCurrentChange = (val: number) => {
-  listQuery.page = val
+const handleCurrentChange = (current: number) => {
+  listQuery.page = current
   getList()
 }
 
 const handleAdd = () => {
-  Object.assign(temp, {
-    goods_id: '',
-    location_id: '',
-    adjust_quantity: 0,
-    remark: ''
-  })
+  temp.goods_id = ''
+  temp.location_id = ''
+  temp.adjust_quantity = 0
+  temp.remark = ''
   dialogVisible.value = true
 }
 
 const confirmAdjust = async () => {
-  await dataFormRef.value.validate(async (valid: boolean) => {
-    if (valid) {
-      if (temp.adjust_quantity === 0) {
-        ElMessage.warning('调整数量不能为0')
-        return
-      }
-      try {
-        await adjustInventory(temp)
-        ElMessage.success('调整成功')
-        dialogVisible.value = false
-        getList()
-      } catch (error) {
-        console.error(error)
-      }
+  const errors = await dataFormRef.value?.validate()
+  if (!errors) {
+    try {
+      await adjustInventory(temp)
+      Message.success('调整成功')
+      dialogVisible.value = false
+      getList()
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
     }
-  })
+  }
+  return false
+}
+
+const handleExport = () => {
+  Message.info('导出功能开发中...')
+}
+
+const getTypeTagColor = (type: string) => {
+  const map: any = {
+    '入库': 'green',
+    '出库': 'orange',
+    '调整': 'arcoblue'
+  }
+  return map[type] || 'gray'
 }
 
 const formatTime = (time: string) => {
+  if (!time) return '-'
   return new Date(time).toLocaleString()
 }
 
@@ -217,20 +260,69 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.filter-container {
+.header-section {
+  margin-bottom: 24px;
+  .page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1d2129;
+    margin: 0;
+  }
+}
+
+.action-card {
   margin-bottom: 16px;
 }
-.card-header {
+
+.filter-card {
+  margin-bottom: 16px;
+}
+
+.table-card {
+  background-color: #fff;
+}
+
+.goods-info-cell {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  .goods-icon {
+    width: 36px;
+    height: 36px;
+    background-color: #f2f3f5;
+    color: #4e5969;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .goods-detail {
+    .name {
+      font-weight: 500;
+      color: #1d2129;
+      margin-bottom: 2px;
+    }
+    .sku {
+      font-size: 12px;
+      color: #86909c;
+    }
+  }
 }
-.text-success {
-  color: #67c23a;
-  font-weight: bold;
+
+.order-no {
+  color: #86909c;
+  font-size: 13px;
 }
-.text-danger {
-  color: #f56c6c;
+
+.change-quantity {
   font-weight: bold;
+  &.text-success {
+    color: #00b42a;
+  }
+  &.text-danger {
+    color: #f53f3f;
+  }
 }
 </style>

@@ -1,120 +1,146 @@
 <template>
   <div class="app-container">
-    <el-card class="filter-container" shadow="never">
-      <el-form :inline="true" :model="listQuery" class="demo-form-inline">
-        <el-form-item label="货品名称">
-          <el-input v-model="listQuery.name" placeholder="请输入货品名称" clearable @keyup.enter="handleFilter" />
-        </el-form-item>
-        <el-form-item label="SKU编码">
-          <el-input v-model="listQuery.sku" placeholder="请输入SKU编码" clearable @keyup.enter="handleFilter" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleFilter">查询</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <div class="header-section">
+      <h1 class="page-title">货品管理</h1>
+    </div>
 
-    <el-card class="table-container" shadow="never">
-      <template #header>
-        <div class="card-header">
-          <div class="header-left">
-            <el-button type="primary" icon="Plus" @click="handleAdd">新增货品</el-button>
-            <el-button type="success" icon="Download" @click="handleExport">导出</el-button>
-            <el-button type="warning" icon="Upload" @click="handleImport">导入</el-button>
-          </div>
-        </div>
-      </template>
+    <a-card class="action-card" :bordered="false">
+      <a-space>
+        <a-button type="primary" @click="handleAdd">
+          <template #icon><icon-plus /></template>
+          新增货品
+        </a-button>
+        <a-button @click="handleExport">
+          <template #icon><icon-download /></template>
+          导出
+        </a-button>
+      </a-space>
+    </a-card>
 
-      <el-table
-        v-loading="listLoading"
+    <a-card class="filter-card" :bordered="false">
+      <a-form :model="listQuery" layout="inline" @submit="handleFilter">
+        <a-form-item label="货品编码">
+          <a-input v-model="listQuery.sku" placeholder="输入货品编码" allow-clear />
+        </a-form-item>
+        <a-form-item label="货品名称">
+          <a-input v-model="listQuery.name" placeholder="输入货品名称" allow-clear />
+        </a-form-item>
+        <a-form-item label="分类">
+          <a-select v-model="listQuery.category" placeholder="选择分类" allow-clear style="width: 180px">
+            <a-option label="五金" value="五金" />
+            <a-option label="配件" value="配件" />
+            <a-option label="耗材" value="耗材" />
+            <a-option label="劳保" value="劳保" />
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleFilter">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button @click="resetQuery">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </a-card>
+
+    <a-card class="table-card" :bordered="false">
+      <a-table
+        :loading="listLoading"
         :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%;"
+        :pagination="pagination"
+        @page-change="handleCurrentChange"
+        @page-size-change="handleSizeChange"
       >
-        <el-table-column label="货品名称" prop="name" align="center" />
-        <el-table-column label="SKU编码" prop="sku" align="center" />
-        <el-table-column label="条码" prop="barcode" align="center" />
-        <el-table-column label="分类" prop="category" align="center" />
-        <el-table-column label="单位" prop="unit" align="center" />
-        <el-table-column label="规格" prop="spec" align="center" />
-        <el-table-column label="安全库存" prop="min_stock" align="center" />
-        <el-table-column label="状态" align="center">
-          <template #default="scope">
-            <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
-              {{ scope.row.status === 1 ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="200">
-          <template #default="scope">
-            <el-button link type="primary" icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-container">
-        <el-pagination
-          :current-page="listQuery.page"
-          :page-sizes="[10, 20, 30, 50]"
-          :page-size="listQuery.limit"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
+        <template #columns>
+          <a-table-column title="货品编码" data-index="sku" :width="120" />
+          <a-table-column title="货品名称" :min-width="200">
+            <template #cell="{ record }">
+              <div class="goods-name-cell">
+                <div class="goods-icon">{{ record.name.charAt(0) }}</div>
+                <span>{{ record.name }}</span>
+              </div>
+            </template>
+          </a-table-column>
+          <a-table-column title="规格" data-index="spec" :width="120" />
+          <a-table-column title="单位" data-index="unit" :width="100" align="center" />
+          <a-table-column title="分类" data-index="category" :width="120" align="center" />
+          <a-table-column title="操作" align="center" :width="180">
+            <template #cell="{ record }">
+              <a-space>
+                <a-button type="text" size="small" @click="handleEdit(record)">
+                  <template #icon><icon-edit /></template>
+                  编辑
+                </a-button>
+                <a-button type="text" status="danger" size="small" @click="handleDelete(record)">
+                  <template #icon><icon-delete /></template>
+                  删除
+                </a-button>
+              </a-space>
+            </template>
+          </a-table-column>
+        </template>
+      </a-table>
+    </a-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
-      <el-form ref="dataFormRef" :model="temp" :rules="rules" label-width="100px" style="width: 450px; margin-left:50px;">
-        <el-form-item label="货品名称" prop="name">
-          <el-input v-model="temp.name" placeholder="请输入货品名称" />
-        </el-form-item>
-        <el-form-item label="SKU编码" prop="sku">
-          <el-input v-model="temp.sku" placeholder="请输入SKU编码" />
-        </el-form-item>
-        <el-form-item label="条码" prop="barcode">
-          <el-input v-model="temp.barcode" placeholder="请输入条码" />
-        </el-form-item>
-        <el-form-item label="分类" prop="category">
-          <el-input v-model="temp.category" placeholder="请输入分类" />
-        </el-form-item>
-        <el-form-item label="单位" prop="unit">
-          <el-input v-model="temp.unit" placeholder="请输入单位" />
-        </el-form-item>
-        <el-form-item label="规格" prop="spec">
-          <el-input v-model="temp.spec" placeholder="请输入规格" />
-        </el-form-item>
-        <el-form-item label="安全库存" prop="min_stock">
-          <el-input-number v-model="temp.min_stock" :min="0" />
-        </el-form-item>
-        <el-form-item label="单价" prop="price">
-          <el-input-number v-model="temp.price" :min="0" :precision="2" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="temp.status">
-            <el-radio :label="1">启用</el-radio>
-            <el-radio :label="0">禁用</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmData">确认</el-button>
-      </template>
-    </el-dialog>
+    <a-modal
+      :visible="dialogVisible"
+      :title="dialogTitle"
+      @cancel="dialogVisible = false"
+      @before-ok="confirmData"
+      width="600px"
+    >
+      <a-form ref="dataFormRef" :model="temp" :rules="rules" auto-label-width>
+        <a-form-item label="货品名称" field="name">
+          <a-input v-model="temp.name" placeholder="请输入货品名称" />
+        </a-form-item>
+        <a-form-item label="SKU编码" field="sku">
+          <a-input v-model="temp.sku" placeholder="请输入SKU编码" />
+        </a-form-item>
+        <a-form-item label="条码" field="barcode">
+          <a-input v-model="temp.barcode" placeholder="请输入条码" />
+        </a-form-item>
+        <a-form-item label="分类" field="category">
+          <a-input v-model="temp.category" placeholder="请输入分类" />
+        </a-form-item>
+        <a-form-item label="单位" field="unit">
+          <a-input v-model="temp.unit" placeholder="请输入单位" />
+        </a-form-item>
+        <a-form-item label="规格" field="spec">
+          <a-input v-model="temp.spec" placeholder="请输入规格" />
+        </a-form-item>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="安全库存" field="min_stock">
+              <a-input-number v-model="temp.min_stock" :min="0" style="width: 100%" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="单价" field="price">
+              <a-input-number v-model="temp.price" :min="0" :precision="2" style="width: 100%" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-form-item label="状态" field="status">
+          <a-radio-group v-model="temp.status">
+            <a-radio :value="1">启用</a-radio>
+            <a-radio :value="0">禁用</a-radio>
+          </a-radio-group>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { getGoodsList, createGoods, updateGoods, deleteGoods } from '@/api/basic'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { Message, Modal } from '@arco-design/web-vue'
 
 const list = ref([])
 const total = ref(0)
@@ -123,8 +149,17 @@ const listQuery = reactive({
   page: 1,
   limit: 20,
   name: undefined,
-  sku: undefined
+  sku: undefined,
+  category: undefined
 })
+
+const pagination = computed(() => ({
+  total: total.value,
+  current: listQuery.page,
+  pageSize: listQuery.limit,
+  showTotal: true,
+  showPageSize: true
+}))
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
@@ -143,9 +178,9 @@ const temp = reactive({
 })
 
 const rules = {
-  name: [{ required: true, message: '货品名称是必填项', trigger: 'blur' }],
-  sku: [{ required: true, message: 'SKU编码是必填项', trigger: 'blur' }],
-  unit: [{ required: true, message: '单位是必填项', trigger: 'blur' }]
+  name: [{ required: true, message: '货品名称是必填项' }],
+  sku: [{ required: true, message: 'SKU编码是必填项' }],
+  unit: [{ required: true, message: '单位是必填项' }]
 }
 
 const getList = async () => {
@@ -156,7 +191,6 @@ const getList = async () => {
       skip: (listQuery.page - 1) * listQuery.limit
     })
     list.value = response
-    // For simplicity, we'll use list length as total or handle total in backend later
     total.value = response.length
   } catch (error) {
     console.error(error)
@@ -173,16 +207,17 @@ const handleFilter = () => {
 const resetQuery = () => {
   listQuery.name = undefined
   listQuery.sku = undefined
+  listQuery.category = undefined
   handleFilter()
 }
 
-const handleSizeChange = (val: number) => {
-  listQuery.limit = val
+const handleSizeChange = (pageSize: number) => {
+  listQuery.limit = pageSize
   getList()
 }
 
-const handleCurrentChange = (val: number) => {
-  listQuery.page = val
+const handleCurrentChange = (current: number) => {
+  listQuery.page = current
   getList()
 }
 
@@ -214,17 +249,35 @@ const handleEdit = (row: any) => {
 }
 
 const confirmData = async () => {
-  await dataFormRef.value.validate(async (valid: boolean) => {
-    if (valid) {
+  const errors = await dataFormRef.value?.validate()
+  if (!errors) {
+    try {
+      if (temp._id) {
+        await updateGoods(temp._id, temp)
+        Message.success('更新成功')
+      } else {
+        await createGoods(temp)
+        Message.success('创建成功')
+      }
+      dialogVisible.value = false
+      getList()
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  }
+  return false
+}
+
+const handleDelete = (row: any) => {
+  Modal.confirm({
+    title: '提示',
+    content: '确认删除该货品吗?',
+    onOk: async () => {
       try {
-        if (temp._id) {
-          await updateGoods(temp._id, temp)
-          ElMessage.success('更新成功')
-        } else {
-          await createGoods(temp)
-          ElMessage.success('创建成功')
-        }
-        dialogVisible.value = false
+        await deleteGoods(row._id)
+        Message.success('删除成功')
         getList()
       } catch (error) {
         console.error(error)
@@ -233,24 +286,8 @@ const confirmData = async () => {
   })
 }
 
-const handleDelete = (row: any) => {
-  ElMessageBox.confirm('确认删除该货品吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-    await deleteGoods(row._id)
-    ElMessage.success('删除成功')
-    getList()
-  })
-}
-
 const handleExport = () => {
-  ElMessage.info('功能开发中...')
-}
-
-const handleImport = () => {
-  ElMessage.info('功能开发中...')
+  Message.info('功能开发中...')
 }
 
 onMounted(() => {
@@ -259,12 +296,45 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.filter-container {
-  margin-bottom: 16px;
+.header-section {
+  margin-bottom: 24px;
+  .page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1d2129;
+    margin: 0;
+  }
 }
-.card-header {
+
+.action-card {
+  margin-bottom: 16px;
+  background-color: #fff;
+}
+
+.filter-card {
+  margin-bottom: 16px;
+  background-color: #fff;
+}
+
+.table-card {
+  background-color: #fff;
+}
+
+.goods-name-cell {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  .goods-icon {
+    width: 32px;
+    height: 32px;
+    background-color: #f2f3f5;
+    color: #4e5969;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+  }
 }
 </style>

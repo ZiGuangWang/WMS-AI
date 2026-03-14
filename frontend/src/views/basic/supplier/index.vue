@@ -13,9 +13,11 @@
     </el-card>
 
     <el-card class="table-container" shadow="never">
-      <div slot="header" class="clearfix">
-        <el-button type="primary" icon="Plus" @click="handleAdd">新增供应商</el-button>
-      </div>
+      <template #header>
+        <div class="card-header">
+          <el-button type="primary" icon="Plus" @click="handleAdd">新增供应商</el-button>
+        </div>
+      </template>
 
       <el-table
         v-loading="listLoading"
@@ -23,7 +25,7 @@
         border
         fit
         highlight-current-row
-        style="width: 100%; margin-top: 20px;"
+        style="width: 100%;"
       >
         <el-table-column label="供应商名称" prop="name" align="center" />
         <el-table-column label="联系人" prop="contact_person" align="center" />
@@ -222,15 +224,12 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.app-container {
-  padding: 20px;
-}
 .filter-container {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
-.pagination-container {
-  margin-top: 30px;
+.card-header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

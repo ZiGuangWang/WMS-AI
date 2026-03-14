@@ -16,11 +16,15 @@
     </el-card>
 
     <el-card class="table-container" shadow="never">
-      <div slot="header" class="clearfix">
-        <el-button type="primary" icon="Plus" @click="handleAdd">新增货品</el-button>
-        <el-button type="success" icon="Download" @click="handleExport">导出</el-button>
-        <el-button type="warning" icon="Upload" @click="handleImport">导入</el-button>
-      </div>
+      <template #header>
+        <div class="card-header">
+          <div class="header-left">
+            <el-button type="primary" icon="Plus" @click="handleAdd">新增货品</el-button>
+            <el-button type="success" icon="Download" @click="handleExport">导出</el-button>
+            <el-button type="warning" icon="Upload" @click="handleImport">导入</el-button>
+          </div>
+        </div>
+      </template>
 
       <el-table
         v-loading="listLoading"
@@ -28,7 +32,7 @@
         border
         fit
         highlight-current-row
-        style="width: 100%; margin-top: 20px;"
+        style="width: 100%;"
       >
         <el-table-column label="货品名称" prop="name" align="center" />
         <el-table-column label="SKU编码" prop="sku" align="center" />
@@ -255,15 +259,12 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.app-container {
-  padding: 20px;
-}
 .filter-container {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
-.pagination-container {
-  margin-top: 30px;
+.card-header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

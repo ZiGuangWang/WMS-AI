@@ -3,31 +3,67 @@
     <!-- 数据概览 -->
     <el-row :gutter="20">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
-          <template #header>今日入库单</template>
-          <div class="stat-value">{{ stats.today_inbound }}</div>
-          <div class="stat-footer">健康</div>
+        <el-card shadow="hover" class="stat-card primary">
+          <div class="stat-content">
+            <div class="stat-info">
+              <div class="stat-label">今日入库单</div>
+              <div class="stat-value">{{ stats.today_inbound }}</div>
+            </div>
+            <div class="stat-icon">
+              <el-icon size="40"><Download /></el-icon>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="trend">较昨日 <el-icon><CaretTop /></el-icon> 2</span>
+          </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
-          <template #header>今日出库单</template>
-          <div class="stat-value">{{ stats.today_outbound }}</div>
-          <div class="stat-footer">健康</div>
+        <el-card shadow="hover" class="stat-card success">
+          <div class="stat-content">
+            <div class="stat-info">
+              <div class="stat-label">今日出库单</div>
+              <div class="stat-value">{{ stats.today_outbound }}</div>
+            </div>
+            <div class="stat-icon">
+              <el-icon size="40"><Upload /></el-icon>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="trend">较昨日 <el-icon><CaretBottom /></el-icon> 1</span>
+          </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
-          <template #header>库存总量</template>
-          <div class="stat-value">{{ stats.inventory_total }}</div>
-          <div class="stat-footer">实时数据</div>
+        <el-card shadow="hover" class="stat-card info">
+          <div class="stat-content">
+            <div class="stat-info">
+              <div class="stat-label">库存总量</div>
+              <div class="stat-value">{{ stats.inventory_total }}</div>
+            </div>
+            <div class="stat-icon">
+              <el-icon size="40"><Box /></el-icon>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span>实时数据更新</span>
+          </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card warning">
-          <template #header>库存预警</template>
-          <div class="stat-value">{{ stats.warning_count }}</div>
-          <div class="stat-footer">需要及时处理</div>
+        <el-card shadow="hover" class="stat-card danger">
+          <div class="stat-content">
+            <div class="stat-info">
+              <div class="stat-label">库存预警</div>
+              <div class="stat-value">{{ stats.warning_count }}</div>
+            </div>
+            <div class="stat-icon">
+              <el-icon size="40"><Warning /></el-icon>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span>需要及时处理</span>
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -127,20 +163,63 @@ onMounted(() => {
 }
 
 .stat-card {
-  .stat-value {
-    font-size: 32px;
-    font-weight: bold;
-    color: #303133;
-    margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  
+  .stat-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
   }
-  .stat-footer {
+  
+  .stat-label {
     font-size: 14px;
     color: #909399;
+    margin-bottom: 8px;
   }
-  &.warning {
-    .stat-value {
-      color: #f56c6c;
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #303133;
+  }
+  
+  .stat-icon {
+    opacity: 0.8;
+  }
+  
+  .stat-footer {
+    border-top: 1px solid #f0f2f5;
+    padding-top: 10px;
+    font-size: 13px;
+    color: #606266;
+    
+    .trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
+  }
+  
+  &.primary {
+    background: linear-gradient(135deg, #e6f7ff 0%, #ffffff 100%);
+    .stat-icon { color: #1890ff; }
+    .trend { color: #52c41a; }
+  }
+  &.success {
+    background: linear-gradient(135deg, #f6ffed 0%, #ffffff 100%);
+    .stat-icon { color: #52c41a; }
+    .trend { color: #f5222d; }
+  }
+  &.info {
+    background: linear-gradient(135deg, #f9f0ff 0%, #ffffff 100%);
+    .stat-icon { color: #722ed1; }
+  }
+  &.danger {
+    background: linear-gradient(135deg, #fff1f0 0%, #ffffff 100%);
+    .stat-icon { color: #f5222d; }
+    .stat-value { color: #f5222d; }
   }
 }
 

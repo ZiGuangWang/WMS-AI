@@ -67,9 +67,6 @@ async def _upsert_account(db) -> dict:
 
 def _permissions_def() -> List[Dict]:
     return [
-        {"name": "认证", "code": "wms:auth:menu", "type": "menu", "parent": None, "sort": 0},
-        {"name": "登录页", "code": "wms:auth:login:view", "type": "menu", "parent": "wms:auth:menu", "sort": 1},
-        {"name": "登录", "code": "wms:auth:login:submit", "type": "button", "parent": "wms:auth:login:view", "sort": 1},
         {"name": "工作台", "code": "wms:dashboard:menu", "type": "menu", "parent": None, "sort": 1},
         {"name": "控制台首页", "code": "wms:dashboard:home:view", "type": "menu", "parent": "wms:dashboard:menu", "sort": 1},
         {"name": "快捷-入库单", "code": "wms:dashboard:home:go_inbound_order", "type": "button", "parent": "wms:dashboard:home:view", "sort": 2},

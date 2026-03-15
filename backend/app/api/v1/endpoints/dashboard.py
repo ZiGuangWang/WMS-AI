@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.db.mongodb import get_database
+from app.core.rbac import require_permissions
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 from datetime import datetime, timedelta
@@ -7,7 +8,10 @@ from datetime import datetime, timedelta
 router = APIRouter()
 
 @router.get("/stats")
-async def get_dashboard_stats(db: AsyncIOMotorDatabase = Depends(get_database)):
+async def get_dashboard_stats(
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:dashboard:home:view")),
+):
     now = datetime.now()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday_start = today_start - timedelta(days=1)
@@ -36,8 +40,7 @@ async def get_dashboard_stats(db: AsyncIOMotorDatabase = Depends(get_database)):
     pipeline = [{"$group": {"_id": None, "total": {"$sum": "$quantity"}}}]
     inventory_total_res = await db["inventory"].aggregate(pipeline).to_list(length=1)
     inventory_total = inventory_total_res[0]["total"] if inventory_total_res else 0
-    # 这里为了演示趋势，模拟一个对比值（实际可能需要每日库存快照表）
-    inventory_trend = 0.5 # 模拟微增
+    inventory_trend = 0.0
     
     # 4. 预警数量
     pipeline_warning = [
@@ -49,8 +52,7 @@ async def get_dashboard_stats(db: AsyncIOMotorDatabase = Depends(get_database)):
         goods = await db["goods"].find_one({"_id": ObjectId(item["_id"])})
         if goods and item["total"] < goods.get("min_stock", 0):
             warning_count += 1
-    # 模拟预警趋势
-    warning_trend = -2.0 # 模拟下降
+    warning_trend = 0.0
             
     return {
         "today_inbound": {

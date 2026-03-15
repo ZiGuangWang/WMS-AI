@@ -7,13 +7,19 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: () => import('../views/login/index.vue'),
-    meta: { title: '登录', permission: 'wms:auth:login:view' }
+    meta: { title: '登录' }
   },
   {
     path: '/',
     component: () => import('../layout/index.vue'),
     redirect: '/dashboard',
     children: [
+      {
+        path: '403',
+        name: 'Forbidden',
+        component: () => import('../views/forbidden/index.vue'),
+        meta: { title: '无权限访问' }
+      },
       {
         path: 'dashboard',
         name: 'Dashboard',
@@ -89,21 +95,52 @@ const router = createRouter({
   routes
 })
 
+function getModuleMenuPermission(code: string): string {
+  const raw = (code || '').trim()
+  if (!raw) return ''
+  if (!raw.startsWith('wms:')) return ''
+  if (!raw.endsWith(':view')) return ''
+  const parts = raw.split(':')
+  if (parts.length < 2) return ''
+  return `wms:${parts[1]}:menu`
+}
+
+function hasAccess(required: string): boolean {
+  if (!required) return true
+  if (hasPermission(required)) return true
+  const moduleMenu = getModuleMenuPermission(required)
+  return moduleMenu ? hasPermission(moduleMenu) : false
+}
+
+function getFirstAccessiblePath(): string {
+  const candidates = router
+    .getRoutes()
+    .map(r => ({ path: r.path, permission: (r.meta?.permission as string | undefined) || '' }))
+    .filter(r => r.path && r.path !== '/' && r.path !== '/login' && r.path !== '/403')
+    .filter(r => !r.permission || hasAccess(r.permission))
+    .map(r => r.path)
+    .filter(p => p.startsWith('/'))
+
+  return candidates[0] || '/403'
+}
+
 router.beforeEach(async (to) => {
   if (to.path === '/login') return true
   const token = localStorage.getItem('token')
   if (!token) return '/login'
 
   const required = (to.meta?.permission as string | undefined) || ''
-  if (required && !hasPermission(required)) {
+  if (required && !hasAccess(required)) {
     try {
       const res: any = await getMe()
       setPermissionCodes(res.permissions || [])
     } catch {
       return '/login'
     }
-    if (required && !hasPermission(required)) {
-      return '/dashboard'
+    if (required && !hasAccess(required)) {
+      const fallback = getFirstAccessiblePath()
+      if (fallback === to.path) return '/403'
+      return fallback
     }
   }
 

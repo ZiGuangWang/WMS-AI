@@ -112,7 +112,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { hasAnyPermission } from '@/utils/permission'
+import { hasAnyAccess } from '@/utils/permission'
 
 const route = useRoute()
 const router = useRouter()
@@ -120,10 +120,10 @@ const router = useRouter()
 const isCollapse = ref(false)
 const activeMenu = computed(() => route.path)
 const currentUsername = ref(localStorage.getItem('username') || '系统管理员')
-const showBasic = computed(() => hasAnyPermission(['wms:basic:goods:view', 'wms:basic:location:view', 'wms:basic:supplier:view']))
-const showInbound = computed(() => hasAnyPermission(['wms:inbound:order:view', 'wms:inbound:check:view']))
-const showOutbound = computed(() => hasAnyPermission(['wms:outbound:order:view', 'wms:outbound:review:view']))
-const showInventory = computed(() => hasAnyPermission(['wms:inventory:query:view', 'wms:inventory:warning:view', 'wms:inventory:adjust:view']))
+const showBasic = computed(() => hasAnyAccess(['wms:basic:goods:view', 'wms:basic:location:view', 'wms:basic:supplier:view']))
+const showInbound = computed(() => hasAnyAccess(['wms:inbound:order:view', 'wms:inbound:check:view']))
+const showOutbound = computed(() => hasAnyAccess(['wms:outbound:order:view', 'wms:outbound:review:view']))
+const showInventory = computed(() => hasAnyAccess(['wms:inventory:query:view', 'wms:inventory:warning:view', 'wms:inventory:adjust:view']))
 
 const breadcrumbs = computed(() => {
   const matched = route.matched.filter(item => item.meta && item.meta.title)

@@ -47,7 +47,15 @@ Windows 自带的 `python.exe` 别名会干扰真实环境，必须关闭：
    python -m pip install --upgrade pip
    pip install -r requirements.txt
    ```
-5. **启动服务**:
+5. **初始化权限系统数据（首次启动必做）**:
+   - 该项目的登录与接口鉴权依赖 MongoDB 中 `permission_manager` 库的 RBAC 数据；若未初始化，后端会报“权限系统未初始化”。
+   - 可选：先配置环境变量 `MONGODB_URI` 指向你的 MongoDB（默认 `mongodb://localhost:27017/permission_manager`）。
+   - 在 `backend` 目录执行：
+     ```bash
+     python scripts/init_wms_permihub.py
+     ```
+   - 脚本会创建/更新 `wms` 系统、默认管理员账号、权限树与 `super_admin` 角色；默认账号：`wms_admin`，默认密码：`123456`（建议初始化后尽快修改）。
+6. **启动服务**:
    ```bash
    python -m uvicorn app.main:app --reload
    ```
@@ -57,6 +65,12 @@ Windows 自带的 `python.exe` 别名会干扰真实环境，必须关闭：
 1. 进入 `frontend` 目录
 2. 安装依赖: `npm install`
 3. 启动项目: `npm run dev`
+
+## 权限联动（PermiHub-AI）
+
+- 本项目的账号、角色、权限数据来自 MongoDB 的 `permission_manager`，与 PermiHub-AI 共用同一套 RBAC 数据。
+- 在 PermiHub-AI 给角色“分配权限”时，WMS-AI 的页面访问与菜单显示主要依赖 `wms:xxx:yyy:view`（页面权限）；仅勾选模块节点但未包含页面 `view` 时，WMS-AI 会提示无权限或看不到菜单入口。
+- 修改角色权限后，需要在 WMS-AI 重新登录（或清理本地 `token/permission_codes`）以刷新权限缓存。
 
 ## 技术栈
 

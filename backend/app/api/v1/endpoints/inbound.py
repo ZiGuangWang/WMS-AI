@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.db.mongodb import get_database
+from app.core.rbac import require_permissions
 from app.models.inbound import InboundOrder, InboundOrderCreate, InboundOrderUpdate
 from app.models.inventory import Inventory, InventoryLog
 from .crud_helper import CRUD
@@ -19,7 +20,8 @@ async def list_orders(
     status: Optional[int] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=1000),
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inbound:order:view")),
 ):
     query = {}
     if order_no: query["order_no"] = {"$regex": order_no, "$options": "i"}
@@ -28,7 +30,11 @@ async def list_orders(
     return await inbound_crud.get_all(db, query, skip, limit)
 
 @router.post("/orders", response_model=InboundOrder, status_code=status.HTTP_201_CREATED)
-async def create_order(data: InboundOrderCreate, db: AsyncIOMotorDatabase = Depends(get_database)):
+async def create_order(
+    data: InboundOrderCreate,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inbound:order:add")),
+):
     # Generate Order No: IN + timestamp
     order_no = f"IN{datetime.now().strftime('%Y%m%d%H%M%S')}"
     order_dict = data.model_dump()
@@ -37,21 +43,34 @@ async def create_order(data: InboundOrderCreate, db: AsyncIOMotorDatabase = Depe
     return await inbound_crud.create(db, order_dict)
 
 @router.get("/orders/{id}", response_model=InboundOrder)
-async def get_order(id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+async def get_order(
+    id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inbound:order:view")),
+):
     order = await inbound_crud.get_one(db, id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
 @router.put("/orders/{id}", response_model=InboundOrder)
-async def update_order(id: str, data: InboundOrderUpdate, db: AsyncIOMotorDatabase = Depends(get_database)):
+async def update_order(
+    id: str,
+    data: InboundOrderUpdate,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inbound:order:edit")),
+):
     updated = await inbound_crud.update(db, id, data.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(status_code=404, detail="Order not found")
     return updated
 
 @router.post("/orders/{id}/audit")
-async def audit_order(id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+async def audit_order(
+    id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inbound:order:audit")),
+):
     # 待审核 -> 待验收
     updated = await db["inbound_orders"].find_one_and_update(
         {"_id": ObjectId(id), "status": 1},
@@ -63,7 +82,12 @@ async def audit_order(id: str, db: AsyncIOMotorDatabase = Depends(get_database))
     return {"message": "Audit successful", "order": updated}
 
 @router.post("/orders/{id}/receive")
-async def receive_goods(id: str, items: List[dict], db: AsyncIOMotorDatabase = Depends(get_database)):
+async def receive_goods(
+    id: str,
+    items: List[dict],
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inbound:check:check_confirm")),
+):
     # 待验收 -> 待上架
     # items list should contain updated received_quantity
     updated = await db["inbound_orders"].find_one_and_update(
@@ -76,7 +100,11 @@ async def receive_goods(id: str, items: List[dict], db: AsyncIOMotorDatabase = D
     return {"message": "Receipt successful", "order": updated}
 
 @router.post("/orders/{id}/shelve")
-async def shelve_goods(id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+async def shelve_goods(
+    id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inbound:check:shelve_confirm")),
+):
     # 待上架 -> 已完成
     order = await db["inbound_orders"].find_one({"_id": ObjectId(id), "status": 3})
     if not order:

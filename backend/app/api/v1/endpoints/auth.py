@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, List
+import re
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from app.db.mongodb import get_perm_database
 from app.core.security import create_access_token, verify_password
+from app.core.rbac import get_current_username, get_permission_codes
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 
@@ -11,6 +12,8 @@ router = APIRouter()
 class Token(BaseModel):
     access_token: str
     token_type: str
+    permissions: List[str] = []
+    username: str
 
 class LoginRequest(BaseModel):
     username: str
@@ -25,7 +28,9 @@ async def login(
     username = data.username.strip()
     
     # 使用正则表达式进行不区分大小写的查找
-    user = await db["accounts"].find_one({"username": {"$regex": f"^{username}$", "$options": "i"}})
+    user = await db["accounts"].find_one(
+        {"username": {"$regex": f"^{re.escape(username)}$", "$options": "i"}}
+    )
     
     if not user:
         raise HTTPException(
@@ -52,15 +57,19 @@ async def login(
     
     # 生成 Token，Payload 为用户名
     access_token = create_access_token(subject=user["username"])
+    permissions = await get_permission_codes(db=db, username=user["username"], system_code="wms")
     
     return {
         "access_token": access_token,
         "token_type": "bearer",
+        "permissions": permissions,
+        "username": user["username"],
     }
 
 @router.get("/me")
 async def get_me(
-    db: AsyncIOMotorDatabase = Depends(get_perm_database)
+    username: str = Depends(get_current_username),
+    db: AsyncIOMotorDatabase = Depends(get_perm_database),
 ) -> Any:
-    # 简易实现：在实际生产中应添加 JWT 校验中间件
-    return {"username": "Admin", "role": "admin"}
+    permissions = await get_permission_codes(db=db, username=username, system_code="wms")
+    return {"username": username, "permissions": permissions}

@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.db.mongodb import get_database
+from app.core.rbac import require_permissions
 from app.models.inventory import Inventory, InventoryLog
 from app.models.goods import Goods
 from .crud_helper import CRUD
@@ -20,7 +21,8 @@ async def query_inventory(
     batch_no: Optional[str] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=1000),
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inventory:query:view")),
 ):
     query = {}
     if goods_name: query["goods_name"] = {"$regex": goods_name, "$options": "i"}
@@ -31,7 +33,8 @@ async def query_inventory(
 
 @router.get("/warning")
 async def get_inventory_warning(
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inventory:warning:view")),
 ):
     # Find goods where total inventory < min_stock
     # Aggregate inventory by goods_id
@@ -72,7 +75,8 @@ async def get_inventory_warning(
 @router.post("/adjust")
 async def adjust_inventory(
     data: dict,
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inventory:adjust:confirm")),
 ):
     goods_id = data.get("goods_id")
     location_id = data.get("location_id")
@@ -149,7 +153,8 @@ async def get_inventory_logs(
     type: Optional[str] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=1000),
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: None = Depends(require_permissions("wms:inventory:adjust:view")),
 ):
     query = {}
     if goods_id: query["goods_id"] = goods_id

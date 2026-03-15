@@ -6,11 +6,11 @@
 
     <a-card class="action-card" :bordered="false">
       <a-space>
-        <a-button type="primary" @click="handleAdd">
+        <a-button type="primary" v-permission="'wms:basic:goods:add'" @click="handleAdd">
           <template #icon><icon-plus /></template>
           新增货品
         </a-button>
-        <a-button @click="handleExport">
+        <a-button v-permission="'wms:basic:goods:export'" @click="handleExport">
           <template #icon><icon-download /></template>
           导出
         </a-button>
@@ -35,11 +35,11 @@
         </a-form-item>
         <a-form-item>
           <a-space>
-            <a-button type="primary" @click="handleFilter">
+            <a-button type="primary" v-permission="'wms:basic:goods:search'" @click="handleFilter">
               <template #icon><icon-search /></template>
               查询
             </a-button>
-            <a-button @click="resetQuery">
+            <a-button v-permission="'wms:basic:goods:reset'" @click="resetQuery">
               <template #icon><icon-refresh /></template>
               重置
             </a-button>
@@ -72,11 +72,11 @@
           <a-table-column title="操作" align="center" :width="180">
             <template #cell="{ record }">
               <a-space>
-                <a-button type="text" size="small" @click="handleEdit(record)">
+                <a-button type="text" size="small" v-permission="'wms:basic:goods:edit'" @click="handleEdit(record)">
                   <template #icon><icon-edit /></template>
                   编辑
                 </a-button>
-                <a-button type="text" status="danger" size="small" @click="handleDelete(record)">
+                <a-button type="text" status="danger" size="small" v-permission="'wms:basic:goods:delete'" @click="handleDelete(record)">
                   <template #icon><icon-delete /></template>
                   删除
                 </a-button>

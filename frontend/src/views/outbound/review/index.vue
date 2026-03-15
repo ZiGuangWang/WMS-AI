@@ -6,11 +6,11 @@
 
     <a-card class="action-card" :bordered="false">
       <a-space>
-        <a-button @click="handleExport">
+        <a-button v-permission="'wms:outbound:review:export'" @click="handleExport">
           <template #icon><icon-download /></template>
           导出
         </a-button>
-        <a-button @click="handlePrint">
+        <a-button v-permission="'wms:outbound:review:print'" @click="handlePrint">
           <template #icon><icon-printer /></template>
           打印出库单
         </a-button>
@@ -24,11 +24,11 @@
         </a-form-item>
         <a-form-item>
           <a-space>
-            <a-button type="primary" @click="handleFilter">
+            <a-button type="primary" v-permission="'wms:outbound:review:search'" @click="handleFilter">
               <template #icon><icon-search /></template>
               查询
             </a-button>
-            <a-button @click="resetQuery">
+            <a-button v-permission="'wms:outbound:review:reset'" @click="resetQuery">
               <template #icon><icon-refresh /></template>
               重置
             </a-button>
@@ -68,15 +68,15 @@
           <a-table-column title="操作" align="center" :width="220" fixed="right">
             <template #cell="{ record }">
               <a-space>
-                <a-button v-if="record.status === 2" type="text" size="small" @click="handleReview(record)">
+                <a-button v-if="record.status === 2" type="text" size="small" v-permission="'wms:outbound:review:review_open'" @click="handleReview(record)">
                   <template #icon><icon-search /></template>
                   货物复核
                 </a-button>
-                <a-button v-if="record.status === 3" type="text" status="success" size="small" @click="handleShip(record)">
+                <a-button v-if="record.status === 3" type="text" status="success" size="small" v-permission="'wms:outbound:review:ship_confirm'" @click="handleShip(record)">
                   <template #icon><icon-send /></template>
                   确认发货
                 </a-button>
-                <a-button type="text" size="small" @click="handleDetail(record)">
+                <a-button type="text" size="small" v-permission="'wms:outbound:review:detail'" @click="handleDetail(record)">
                   <template #icon><icon-eye /></template>
                   详情
                 </a-button>

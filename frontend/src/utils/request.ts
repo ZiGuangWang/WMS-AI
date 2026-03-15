@@ -31,7 +31,6 @@ service.interceptors.response.use(
     let message = error.message
     
     if (error.response) {
-      // 只有在非登录页面且发生 401 错误时才跳转到登录页
       if (error.response.status === 401 && window.location.pathname !== '/login') {
         localStorage.removeItem('token')
         window.location.href = '/login'

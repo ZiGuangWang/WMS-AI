@@ -6,11 +6,11 @@
 
     <a-card class="action-card" :bordered="false">
       <a-space>
-        <a-button status="danger" @click="handleExport">
+        <a-button status="danger" v-permission="'wms:inventory:warning:export'" @click="handleExport">
           <template #icon><icon-exclamation-circle /></template>
           导出预警列表
         </a-button>
-        <a-button @click="getList">
+        <a-button v-permission="'wms:inventory:warning:refresh'" @click="getList">
           <template #icon><icon-refresh /></template>
           刷新数据
         </a-button>
@@ -49,7 +49,7 @@
           </a-table-column>
           <a-table-column title="操作" align="center" :width="150" fixed="right">
             <template #cell="{ record }">
-              <a-button type="text" size="small" @click="handleRestock(record)">
+              <a-button type="text" size="small" v-permission="'wms:inventory:warning:restock_go'" @click="handleRestock(record)">
                 <template #icon><icon-shopping-cart /></template>
                 去补货
               </a-button>

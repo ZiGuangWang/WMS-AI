@@ -6,11 +6,11 @@
 
     <a-card class="action-card" :bordered="false">
       <a-space>
-        <a-button @click="handleExport">
+        <a-button v-permission="'wms:inventory:query:export'" @click="handleExport">
           <template #icon><icon-download /></template>
           导出库存报表
         </a-button>
-        <a-button @click="getList">
+        <a-button v-permission="'wms:inventory:query:refresh'" @click="getList">
           <template #icon><icon-refresh /></template>
           刷新数据
         </a-button>
@@ -33,11 +33,11 @@
         </a-form-item>
         <a-form-item>
           <a-space>
-            <a-button type="primary" @click="handleFilter">
+            <a-button type="primary" v-permission="'wms:inventory:query:search'" @click="handleFilter">
               <template #icon><icon-search /></template>
               查询
             </a-button>
-            <a-button @click="resetQuery">
+            <a-button v-permission="'wms:inventory:query:reset'" @click="resetQuery">
               <template #icon><icon-refresh /></template>
               重置
             </a-button>
@@ -87,7 +87,7 @@
           </a-table-column>
           <a-table-column title="操作" align="center" :width="120" fixed="right">
             <template #cell="{ record }">
-              <a-button type="text" size="small" @click="handleHistory(record)">
+              <a-button type="text" size="small" v-permission="'wms:inventory:query:history'" @click="handleHistory(record)">
                 <template #icon><icon-list /></template>
                 流水
               </a-button>

@@ -19,39 +19,39 @@
         style="width: 100%"
         @menu-item-click="handleMenuClick"
       >
-        <a-menu-item key="/dashboard">
+        <a-menu-item key="/dashboard" v-permission="'wms:dashboard:home:view'">
           <template #icon><icon-dashboard /></template>
           工作台
         </a-menu-item>
 
-        <a-sub-menu key="basic">
+        <a-sub-menu key="basic" v-if="showBasic">
           <template #icon><icon-common /></template>
           <template #title>基础数据管理</template>
-          <a-menu-item key="/basic/goods">货品管理</a-menu-item>
-          <a-menu-item key="/basic/location">库位管理</a-menu-item>
-          <a-menu-item key="/basic/supplier">供应商管理</a-menu-item>
+          <a-menu-item key="/basic/goods" v-permission="'wms:basic:goods:view'">货品管理</a-menu-item>
+          <a-menu-item key="/basic/location" v-permission="'wms:basic:location:view'">库位管理</a-menu-item>
+          <a-menu-item key="/basic/supplier" v-permission="'wms:basic:supplier:view'">供应商管理</a-menu-item>
         </a-sub-menu>
 
-        <a-sub-menu key="inbound">
+        <a-sub-menu key="inbound" v-if="showInbound">
           <template #icon><icon-import /></template>
           <template #title>入库管理</template>
-          <a-menu-item key="/inbound/order">入库单管理</a-menu-item>
-          <a-menu-item key="/inbound/check">货物验收</a-menu-item>
+          <a-menu-item key="/inbound/order" v-permission="'wms:inbound:order:view'">入库单管理</a-menu-item>
+          <a-menu-item key="/inbound/check" v-permission="'wms:inbound:check:view'">货物验收</a-menu-item>
         </a-sub-menu>
 
-        <a-sub-menu key="outbound">
+        <a-sub-menu key="outbound" v-if="showOutbound">
           <template #icon><icon-export /></template>
           <template #title>出库管理</template>
-          <a-menu-item key="/outbound/order">出库单管理</a-menu-item>
-          <a-menu-item key="/outbound/review">货物复核</a-menu-item>
+          <a-menu-item key="/outbound/order" v-permission="'wms:outbound:order:view'">出库单管理</a-menu-item>
+          <a-menu-item key="/outbound/review" v-permission="'wms:outbound:review:view'">货物复核</a-menu-item>
         </a-sub-menu>
 
-        <a-sub-menu key="inventory">
+        <a-sub-menu key="inventory" v-if="showInventory">
           <template #icon><icon-storage /></template>
           <template #title>库存管理</template>
-          <a-menu-item key="/inventory/query">库存查询</a-menu-item>
-          <a-menu-item key="/inventory/warning">库存预警</a-menu-item>
-          <a-menu-item key="/inventory/adjust">库存调整</a-menu-item>
+          <a-menu-item key="/inventory/query" v-permission="'wms:inventory:query:view'">库存查询</a-menu-item>
+          <a-menu-item key="/inventory/warning" v-permission="'wms:inventory:warning:view'">库存预警</a-menu-item>
+          <a-menu-item key="/inventory/adjust" v-permission="'wms:inventory:adjust:view'">库存调整</a-menu-item>
         </a-sub-menu>
       </a-menu>
     </a-layout-sider>
@@ -112,6 +112,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { hasAnyPermission } from '@/utils/permission'
 
 const route = useRoute()
 const router = useRouter()
@@ -119,6 +120,10 @@ const router = useRouter()
 const isCollapse = ref(false)
 const activeMenu = computed(() => route.path)
 const currentUsername = ref(localStorage.getItem('username') || '系统管理员')
+const showBasic = computed(() => hasAnyPermission(['wms:basic:goods:view', 'wms:basic:location:view', 'wms:basic:supplier:view']))
+const showInbound = computed(() => hasAnyPermission(['wms:inbound:order:view', 'wms:inbound:check:view']))
+const showOutbound = computed(() => hasAnyPermission(['wms:outbound:order:view', 'wms:outbound:review:view']))
+const showInventory = computed(() => hasAnyPermission(['wms:inventory:query:view', 'wms:inventory:warning:view', 'wms:inventory:adjust:view']))
 
 const breadcrumbs = computed(() => {
   const matched = route.matched.filter(item => item.meta && item.meta.title)

@@ -96,7 +96,7 @@
       <h2 class="section-title">快捷操作</h2>
       <a-row :gutter="20">
         <a-col :span="6">
-          <div class="quick-btn blue" @click="router.push('/inbound/order')">
+          <div class="quick-btn blue" v-permission="'wms:dashboard:home:go_inbound_order'" @click="router.push('/inbound/order')">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; margin-bottom: 8px;">
               <path d="M24 44L7.43433 34.4378V15.3444L24 5.78223L40.5657 15.3444V34.4378L24 44Z" />
               <path d="M24 24.8911V44" />
@@ -109,7 +109,7 @@
           </div>
         </a-col>
         <a-col :span="6">
-          <div class="quick-btn green" @click="router.push('/outbound/order')">
+          <div class="quick-btn green" v-permission="'wms:dashboard:home:go_outbound_order'" @click="router.push('/outbound/order')">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; margin-bottom: 8px;">
               <path d="M24 44L7.43433 34.4378V15.3444L24 5.78223L40.5657 15.3444V34.4378L24 44Z" />
               <path d="M24 24.8911V44" />
@@ -122,13 +122,13 @@
           </div>
         </a-col>
         <a-col :span="6">
-          <div class="quick-btn purple" @click="router.push('/inventory/query')">
+          <div class="quick-btn purple" v-permission="'wms:dashboard:home:go_inventory_query'" @click="router.push('/inventory/query')">
             <icon-search :size="24" />
             <span>库存查询</span>
           </div>
         </a-col>
         <a-col :span="6">
-          <div class="quick-btn orange" @click="handleImport">
+          <div class="quick-btn orange" v-permission="'wms:dashboard:home:goods_import'" @click="handleImport">
             <icon-upload :size="24" />
             <span>货品导入</span>
           </div>
@@ -143,7 +143,7 @@
           <icon-exclamation-circle style="color: #ff7d00; margin-right: 8px" />
           库存预警
         </h2>
-        <a-button type="text" @click="router.push('/inventory/warning')">
+        <a-button type="text" v-permission="'wms:dashboard:home:go_inventory_warning'" @click="router.push('/inventory/warning')">
           查看全部 <icon-right />
         </a-button>
       </div>
@@ -154,7 +154,7 @@
             <div class="name">{{ item.goods_name }}</div>
             <div class="detail">库存不足：当前 {{ item.current_stock }} 件，安全库存 {{ item.min_stock }} 件</div>
           </div>
-          <a-button type="text" @click="router.push('/inventory/adjust')">
+          <a-button type="text" v-permission="'wms:dashboard:home:go_inventory_adjust'" @click="router.push('/inventory/adjust')">
             <template #icon><icon-edit /></template>
             调整
           </a-button>

@@ -6,11 +6,11 @@
 
     <a-card class="action-card" :bordered="false">
       <a-space>
-        <a-button type="primary" @click="handleAdd">
+        <a-button type="primary" v-permission="'wms:outbound:order:add'" @click="handleAdd">
           <template #icon><icon-plus /></template>
           新增出库单
         </a-button>
-        <a-button @click="handleExport">
+        <a-button v-permission="'wms:outbound:order:export'" @click="handleExport">
           <template #icon><icon-download /></template>
           导出
         </a-button>
@@ -40,11 +40,11 @@
         </a-form-item>
         <a-form-item>
           <a-space>
-            <a-button type="primary" @click="handleFilter">
+            <a-button type="primary" v-permission="'wms:outbound:order:search'" @click="handleFilter">
               <template #icon><icon-search /></template>
               查询
             </a-button>
-            <a-button @click="resetQuery">
+            <a-button v-permission="'wms:outbound:order:reset'" @click="resetQuery">
               <template #icon><icon-refresh /></template>
               重置
             </a-button>
@@ -89,23 +89,23 @@
           <a-table-column title="操作" align="center" :width="220" fixed="right">
             <template #cell="{ record }">
               <a-space>
-                <a-button v-if="record.status === 1" type="text" size="small" @click="handleAudit(record)">
+                <a-button v-if="record.status === 1" type="text" size="small" v-permission="'wms:outbound:order:audit'" @click="handleAudit(record)">
                   <template #icon><icon-check /></template>
                   审核
                 </a-button>
-                <a-button v-if="record.status === 2" type="text" size="small" @click="handleGoReview(record)">
+                <a-button v-if="record.status === 2" type="text" size="small" v-permission="'wms:outbound:order:review_go'" @click="handleGoReview(record)">
                   <template #icon><icon-check-square /></template>
                   去复核
                 </a-button>
-                <a-button type="text" size="small" @click="handleDetail(record)">
+                <a-button type="text" size="small" v-permission="'wms:outbound:order:detail'" @click="handleDetail(record)">
                   <template #icon><icon-eye /></template>
                   详情
                 </a-button>
-                <a-button v-if="record.status === 1" type="text" size="small" @click="handleEdit(record)">
+                <a-button v-if="record.status === 1" type="text" size="small" v-permission="'wms:outbound:order:edit'" @click="handleEdit(record)">
                   <template #icon><icon-edit /></template>
                   编辑
                 </a-button>
-                <a-button v-if="record.status === 1" type="text" status="danger" size="small" @click="handleDelete(record)">
+                <a-button v-if="record.status === 1" type="text" status="danger" size="small" v-permission="'wms:outbound:order:delete'" @click="handleDelete(record)">
                   <template #icon><icon-delete /></template>
                   删除
                 </a-button>
@@ -148,7 +148,7 @@
         <div class="detail-section">
           <div class="section-header">
             <span class="title">货品明细</span>
-            <a-button type="text" @click="addItem">
+            <a-button type="text" v-permission="'wms:outbound:order:item_add'" @click="addItem">
               <template #icon><icon-plus /></template>
               添加货品
             </a-button>
@@ -181,7 +181,7 @@
               </a-table-column>
               <a-table-column title="操作" align="center" :width="80">
                 <template #cell="{ rowIndex }">
-                  <a-button type="text" status="danger" @click="removeItem(rowIndex)">
+                  <a-button type="text" status="danger" v-permission="'wms:outbound:order:item_remove'" @click="removeItem(rowIndex)">
                     <template #icon><icon-delete /></template>
                   </a-button>
                 </template>

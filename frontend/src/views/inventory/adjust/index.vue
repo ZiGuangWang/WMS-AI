@@ -6,11 +6,11 @@
 
     <a-card class="action-card" :bordered="false">
       <a-space>
-        <a-button type="primary" @click="handleAdd">
+        <a-button type="primary" v-permission="'wms:inventory:adjust:add'" @click="handleAdd">
           <template #icon><icon-plus /></template>
           新增调整单
         </a-button>
-        <a-button @click="handleExport">
+        <a-button v-permission="'wms:inventory:adjust:export'" @click="handleExport">
           <template #icon><icon-download /></template>
           导出调整记录
         </a-button>
@@ -28,11 +28,11 @@
         </a-form-item>
         <a-form-item>
           <a-space>
-            <a-button type="primary" @click="handleFilter">
+            <a-button type="primary" v-permission="'wms:inventory:adjust:search'" @click="handleFilter">
               <template #icon><icon-search /></template>
               查询
             </a-button>
-            <a-button @click="resetQuery">
+            <a-button v-permission="'wms:inventory:adjust:reset'" @click="resetQuery">
               <template #icon><icon-refresh /></template>
               重置
             </a-button>

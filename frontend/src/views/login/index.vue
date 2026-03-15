@@ -53,6 +53,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import { login } from '@/api/auth'
+import { setPermissionCodes } from '@/utils/permission'
 
 const router = useRouter()
 const loginFormRef = ref()
@@ -76,7 +77,8 @@ const handleLogin = async ({ values, errors }: any) => {
     
     // 保存 Token
     localStorage.setItem('token', res.access_token)
-    localStorage.setItem('username', loginForm.username)
+    localStorage.setItem('username', res.username || loginForm.username)
+    setPermissionCodes(res.permissions || [])
     
     Message.success('登录成功，欢迎回来')
     router.push('/')
